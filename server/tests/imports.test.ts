@@ -70,6 +70,25 @@ describe("POST /api/imports/csv", () => {
     expect(res.status).toBe(201);
   });
 
+  it("imports a file without dates over a period and reports how it was spread", async () => {
+    const { token, workspaceId } = await registerUser(app, "a@x.com");
+    const content = "campaign,spend,impressions,clicks,conversions,revenue\nA,70,7000,70,7,140";
+    const res = await upload(token, content).field("periodFrom", "2026-10-01").field("periodTo", "2026-10-07");
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({ status: "completed", rowsImported: 7, spread: { from: "2026-10-01", to: "2026-10-07", days: 7 } });
+    expect(await DailyMetric.count({ where: { workspaceId } })).toBe(7);
+    expect(await upload(token, content).expect(400)).toBeTruthy(); // no period, no date column
+  });
+
+  it("rejects a malformed or reversed period", async () => {
+    const { token } = await registerUser(app, "a@x.com");
+    const content = "campaign,spend,impressions,clicks,conversions,revenue\nA,70,7000,70,7,140";
+    expect((await upload(token, content).field("periodFrom", "2026-10-07").field("periodTo", "2026-10-01")).status).toBe(400);
+    expect((await upload(token, content).field("periodFrom", "10/01/2026").field("periodTo", "2026-10-07")).status).toBe(400);
+    expect((await upload(token, content).field("periodFrom", "2026-10-01")).status).toBe(400);
+    expect((await upload(token, content).field("periodFrom", "2026-13-45").field("periodTo", "2026-10-07")).status).toBe(400);
+  });
+
   it("requires authentication", async () => {
     const res = await request(app).post("/api/imports/csv").attach("file", Buffer.from(VALID), "d.csv");
     expect(res.status).toBe(401);

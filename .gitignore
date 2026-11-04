@@ -8,3 +8,6 @@ coverage
 *.log
 server/evals/reports/
 demo/*.mp4
+
+# Public datasets downloaded by samples/fetch-public-datasets.sh (licenses do not allow redistribution)
+samples/public/

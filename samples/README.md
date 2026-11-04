@@ -16,6 +16,8 @@ new campaigns next to the seeded ones; use a fresh account to see them alone.
 | `08-missing-column.csv` | 5 | A required column (`conversions`) is absent | `400 Missing required columns: conversions` |
 | `09-google-ads-export.csv` | 28 | Google Ads layout: two title lines before the header, `Ad group`, quoted thousands separators (`"1,234.50"`), `--` for no data and a `Total` row at the bottom | `completed`: header found on line 3, the Total row is ignored |
 | `10-custom-columns.csv` | 28 | A layout nobody recognizes (`When`, `Promo`, `Money out`...) | First `400` with the mapping panel; after you map it once, the mapping is saved and the next file with the same columns imports without it |
+| `11-breakdown-by-country.csv` | 85 | Two campaigns x 14 days, each split into 3 rows by `country` (an unmapped extra column), plus one exact copy of a row at the end | `completed_with_errors`: 28 imported, 56 summed into another row of the same campaign and day, 1 rejected as a copy |
+| `12-totals-no-date.csv` | 6 | Totals per ad for a whole period, no date column | First `400` with the mapping panel; enter a **Period from / to** (and map nothing else, since the other columns are recognized, only `date` is missing) and each total is spread evenly over the days |
 
 ## Column mapping for `10-custom-columns.csv`
 | Field | Column in the file |

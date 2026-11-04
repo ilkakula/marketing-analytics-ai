@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, Select } from "@/components/ui/input";
+import { Field, Input, Select } from "@/components/ui/input";
 import { ErrorBox } from "@/components/ui/states";
 import { ImportHistory } from "@/components/ImportHistory";
 import { api, ApiError } from "@/lib/api";
@@ -25,25 +25,31 @@ export function ImportPage() {
   const input = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [mapping, setMapping] = useState<Record<string, string>>({});
+  const [period, setPeriod] = useState({ from: "", to: "" });
   const [dragging, setDragging] = useState(false);
 
   const upload = useMutation({
-    mutationFn: (vars: { file: File; mapping: Record<string, string> }) => {
+    mutationFn: (vars: { file: File; mapping: Record<string, string>; period?: { from: string; to: string } }) => {
       const form = new FormData();
       form.append("file", vars.file);
       if (Object.keys(vars.mapping).length) form.append("mapping", JSON.stringify(vars.mapping));
+      if (vars.period) { form.append("periodFrom", vars.period.from); form.append("periodTo", vars.period.to); }
       return api<ImportJob>("/api/imports/csv", { form });
     },
     // New data changes every report: invalidate the analytics cache.
     onSuccess: () => { for (const k of ["summary", "timeseries", "campaigns", "campaign", "imports"]) qc.invalidateQueries({ queryKey: [k] }); },
   });
 
-  const choose = (f: File | null) => { setFile(f); setMapping({}); upload.reset(); };
+  const choose = (f: File | null) => { setFile(f); setMapping({}); setPeriod({ from: "", to: "" }); upload.reset(); };
   const err = upload.error instanceof ApiError ? upload.error : null;
   const missing: string[] | undefined = err?.details?.missing;
   const found: string[] = err?.details?.foundColumns ?? [];
   const autoDetected: Record<string, string> = err?.details?.detected ?? {};
   const job = upload.data;
+  const noDate = missing?.includes("date") ?? false;
+  const periodOk = !!period.from && !!period.to && period.from <= period.to;
+  // A file without a date column can be imported with a period instead of a date mapping.
+  const needed = (missing ?? []).filter((m) => !(m === "date" && periodOk));
   const step = job ? 3 : missing ? 2 : 1;
 
   return (
@@ -117,7 +123,7 @@ export function ImportPage() {
                 </p>
               )}
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {[...missing, ...OPTIONAL_FIELDS].map((m) => (
+                {[...needed, ...OPTIONAL_FIELDS].map((m) => (
                   <Field key={m} label={FIELD_LABEL[m] ?? m}>
                     <Select value={mapping[m] ?? ""}
                       onChange={(e) => {
@@ -131,8 +137,22 @@ export function ImportPage() {
                   </Field>
                 ))}
               </div>
-              <Button variant="brand" disabled={missing.some((m) => !mapping[m]) || upload.isPending}
-                onClick={() => file && upload.mutate({ file, mapping })}>Import with mapping</Button>
+              {noDate && (
+                <div className="space-y-2 rounded-xl border border-line bg-surface-2 p-3">
+                  <p className="text-xs text-ink-2">
+                    No date column? If the file holds totals for a whole period (for example a Meta export without a daily breakdown),
+                    give the period instead. Each total is spread evenly over its days, so daily charts are flat for this data.
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Field label="Period from"><Input type="date" value={period.from} onChange={(e) => setPeriod({ ...period, from: e.target.value })} /></Field>
+                    <Field label="Period to"><Input type="date" value={period.to} min={period.from || undefined} onChange={(e) => setPeriod({ ...period, to: e.target.value })} /></Field>
+                  </div>
+                </div>
+              )}
+              <Button variant="brand" disabled={needed.some((m) => !mapping[m]) || upload.isPending}
+                onClick={() => file && upload.mutate({ file, mapping: noDate && periodOk ? omitDate(mapping) : mapping, period: noDate && periodOk ? period : undefined })}>
+                Import with {noDate && periodOk ? "period" : "mapping"}
+              </Button>
             </div>
           )}
         </CardBody>
@@ -143,6 +163,8 @@ export function ImportPage() {
     </>
   );
 }
+
+const omitDate = ({ date: _d, ...rest }: Record<string, string>) => rest;
 
 const DETECTED_TEXT = {
   meta: "Detected a Meta Ads export. Columns were matched automatically.",
@@ -178,6 +200,17 @@ function ImportReport({ job }: { job: ImportJob }) {
       </CardHeader>
       <CardBody className="space-y-5">
         {job.detected && <DetectedBanner detected={job.detected} />}
+        {job.spread && (
+          <p className="rounded-xl border border-warn/30 bg-warn-soft px-4 py-3 text-sm">
+            This file had no dates, so each total was spread evenly over {job.spread.days} days ({job.spread.from} to {job.spread.to}).
+            Totals, CTR, CPC and ROAS are exact; the daily shape is not real.
+          </p>
+        )}
+        {!!job.mergedRows && (
+          <p className="rounded-xl border border-line bg-surface-2 px-4 py-3 text-sm">
+            {job.mergedRows.toLocaleString("en-US")} rows were added into the row of the same ad and day (breakdown rows, for example by country or device).
+          </p>
+        )}
         <dl className="grid grid-cols-3 gap-3">
           {([["Total rows", job.totalRows, ""], ["Imported", job.rowsImported, "text-good"], ["Rejected", job.rowsFailed, job.rowsFailed ? "text-bad" : ""]] as const).map(([k, v, c]) => (
             <div key={k} className="rounded-xl border border-line bg-surface-2 p-4">

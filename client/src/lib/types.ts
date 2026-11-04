@@ -25,6 +25,10 @@ export interface ImportJob {
   errors: { row: number; column?: string; message: string }[]; errorsTruncated: boolean;
   /** How the columns were matched (only on the response of the import itself). */
   detected?: { kind: "standard" | "meta" | "google" | "saved" | "custom"; mapping: Record<string, string>; headerRow: number };
+  /** Breakdown rows (same ad and day) that were summed into one. */
+  mergedRows?: number;
+  /** Set when the file had no dates and its totals were spread evenly over this period. */
+  spread?: { from: string; to: string; days: number } | null;
 }
 export interface AuthResult {
   token: string; user: { id: string; email: string; name: string }; workspace: { id: string; name: string };

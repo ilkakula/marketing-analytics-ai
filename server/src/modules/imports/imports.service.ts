@@ -5,7 +5,7 @@ import {
 } from "../../database/models";
 import { AppError, notFound } from "../../shared/errors";
 import { QueryTypes } from "sequelize";
-import { type ColumnMapping, parseCsv } from "./csv.adapter";
+import { type ColumnMapping, type Period, parseCsv } from "./csv.adapter";
 import type { AdMetric } from "./adMetric";
 
 const CHUNK = 1000; // 9 columns * 1000 rows stays far below the Postgres limit of 65535 parameters
@@ -72,11 +72,11 @@ export async function persistMetrics(workspaceId: string, metrics: AdMetric[], t
 }
 
 export async function importCsv(args: {
-  workspaceId: string; userId: string; filename: string; buffer: Buffer; mapping: ColumnMapping;
+  workspaceId: string; userId: string; filename: string; buffer: Buffer; mapping: ColumnMapping; period?: Period;
 }) {
   // File structure errors (missing columns, empty file) throw a 400 before a job is created.
   const savedRows = await ImportMapping.findAll({ where: { workspaceId: args.workspaceId } });
-  const parsed = parseCsv(args.buffer, args.mapping, new Map(savedRows.map((m) => [m.signature, m.mapping as ColumnMapping])));
+  const parsed = parseCsv(args.buffer, args.mapping, new Map(savedRows.map((m) => [m.signature, m.mapping as ColumnMapping])), args.period);
 
   const job = await ImportJob.create({
     workspaceId: args.workspaceId, userId: args.userId, filename: args.filename, status: "processing",
@@ -104,7 +104,7 @@ export async function importCsv(args: {
     await job.update({ status: "failed", rowsImported: 0, errors: [e, ...job.errors].slice(0, MAX_STORED_ERRORS) });
     throw err;
   }
-  return { ...serializeJob(job), detected: parsed.detected };
+  return { ...serializeJob(job), detected: parsed.detected, mergedRows: parsed.mergedRows, spread: parsed.spread };
 }
 
 export async function getImport(workspaceId: string, id: string) {

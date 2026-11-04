@@ -9,7 +9,7 @@ plain-language findings and recommendations in which every number is checked aga
 
 | | |
 |---|---|
-| **Import** | CSV upload with **automatic recognition of Meta Ads and Google Ads exports** (title lines, `Total` rows, currency symbols, thousands separators, `--`), a one-time column mapping that is remembered per file layout, per-row error reports (row, column, reason) and idempotent re-imports. Handles `;` and tab separators, decimal commas, BOMs and UTF-16. Import history with deletion of an import's data. |
+| **Import** | CSV upload with **automatic recognition of Meta Ads and Google Ads exports** (title lines, `Total` rows, currency symbols, thousands separators, `--`), a one-time column mapping that is remembered per file layout, per-row error reports (row, column, reason) and idempotent re-imports. Handles `;` and tab separators, decimal commas, BOMs and UTF-16. Breakdown rows (by country, device...) of the same ad and day are summed; files with totals for a whole period and no date column are spread evenly over a chosen period. Import history with deletion of an import's data. |
 | **Overview** | Spend, revenue, ROAS, conversions, CPA, CTR, CPC and clicks, each compared with the previous period and shown with a trend line. |
 | **Campaigns** | Search, sort by any metric, per-campaign details (ad sets and ads), side-by-side comparison of up to four campaigns, CSV export protected against formula injection. |
 | **AI insights** | A deterministic rules engine finds the problems (campaign losing money, CPC spike, conversion decline, runaway budget, broken tracking). An LLM explains them. |
@@ -87,7 +87,7 @@ npm test             # 170+ tests against the spendlens_test database
 ```
 Without `GEMINI_API_KEY` only the rules layer runs (free key: https://aistudio.google.com/apikey).
 
-Sample CSV files for every import scenario (valid, with errors, European format, a Meta-style export that needs mapping, a 30,000-row file) are in [`samples/`](samples/README.md).
+Sample CSV files for every import scenario (valid, with errors, European format, a Meta-style export that needs mapping, a 30,000-row file) are in [`samples/`](samples/README.md). How the importer behaves on real public datasets is described in [`samples/public-datasets.md`](samples/public-datasets.md).
 
 ## Configuration
 | Env | Meaning |

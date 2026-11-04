@@ -29,8 +29,10 @@ export const openapi = {
     "/api/imports/csv": { post: { summary: "Upload a CSV file (multipart: file, optional mapping)", security: [{ bearer: [] }],
       requestBody: { required: true, content: { "multipart/form-data": { schema: { type: "object", required: ["file"], properties: {
         file: { type: "string", format: "binary" },
-        mapping: { type: "string", description: 'JSON, npr. {"campaign":"Campaign Name","spend":"Cost"}' } } } } } },
-      responses: { "201": { description: "Import finished (status completed or completed_with_errors); `detected` tells how columns were matched: standard, meta, google, saved or custom" }, "400": errorResponse, "413": errorResponse, "422": { description: "No row is valid" } } } },
+        mapping: { type: "string", description: 'JSON, e.g. {"campaign":"Campaign Name","spend":"Cost"}' },
+        periodFrom: { type: "string", description: "YYYY-MM-DD. Only for files without a date column: their totals are spread evenly over periodFrom..periodTo (max 366 days)" },
+        periodTo: { type: "string", description: "YYYY-MM-DD, see periodFrom" } } } } } },
+      responses: { "201": { description: "Import finished (status completed or completed_with_errors); `detected` tells how columns were matched: standard, meta, google, saved or custom; `mergedRows` counts breakdown rows (same ad and day) that were summed into one; `spread` is set when a period was applied to a file without dates" }, "400": errorResponse, "413": errorResponse, "422": { description: "No row is valid" } } } },
     "/api/imports": { get: { summary: "Import history (newest first) with the rows each import currently owns", security: [{ bearer: [] }],
       responses: { "200": { description: "items[]" }, "401": errorResponse } } },
     "/api/imports/{id}": { delete: { summary: "Delete the data an import currently owns; empty campaigns are removed and the job stays in the history as undone", security: [{ bearer: [] }],

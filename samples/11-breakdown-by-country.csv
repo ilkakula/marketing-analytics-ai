@@ -1,0 +1,86 @@
+date,campaign,ad_set,ad,spend,impressions,clicks,conversions,revenue,country
+2026-10-21,Brand Search,All,All,97.37,2652,95,10,380.73,US
+2026-10-21,Brand Search,All,All,39.03,3205,50,5,222.79,DE
+2026-10-21,Brand Search,All,All,9.45,1562,20,1,52.39,RS
+2026-10-22,Brand Search,All,All,75.28,3640,105,8,304.96,US
+2026-10-22,Brand Search,All,All,44.5,3826,108,4,164.54,DE
+2026-10-22,Brand Search,All,All,9.68,1043,11,1,51.12,RS
+2026-10-23,Brand Search,All,All,39.95,2136,49,5,228.06,US
+2026-10-23,Brand Search,All,All,25.87,2847,28,1,36.27,DE
+2026-10-23,Brand Search,All,All,116.92,3057,121,12,391.33,RS
+2026-10-24,Brand Search,All,All,37.42,1740,44,1,24.32,US
+2026-10-24,Brand Search,All,All,50.16,1241,43,2,107.78,DE
+2026-10-24,Brand Search,All,All,5.74,802,13,1,35.02,RS
+2026-10-25,Brand Search,All,All,73.19,3703,81,2,102.28,US
+2026-10-25,Brand Search,All,All,15.66,1905,38,2,72.8,DE
+2026-10-25,Brand Search,All,All,7.36,1283,18,1,38.6,RS
+2026-10-26,Brand Search,All,All,31.83,2794,42,3,82.88,US
+2026-10-26,Brand Search,All,All,88.38,3797,125,8,286.35,DE
+2026-10-26,Brand Search,All,All,18.88,1671,16,1,43.71,RS
+2026-10-27,Brand Search,All,All,15.17,880,14,0,0.0,US
+2026-10-27,Brand Search,All,All,9.79,1210,13,0,0.0,DE
+2026-10-27,Brand Search,All,All,29.82,3299,65,3,70.81,RS
+2026-10-28,Brand Search,All,All,63.93,3186,92,2,89.77,US
+2026-10-28,Brand Search,All,All,43.84,1321,51,3,163.98,DE
+2026-10-28,Brand Search,All,All,25.64,1548,44,2,88.84,RS
+2026-10-29,Brand Search,All,All,67.99,3771,59,5,139.32,US
+2026-10-29,Brand Search,All,All,64.13,2390,87,7,169.08,DE
+2026-10-29,Brand Search,All,All,23.8,958,24,1,35.66,RS
+2026-10-30,Brand Search,All,All,55.22,2523,87,7,189.12,US
+2026-10-30,Brand Search,All,All,115.17,3750,147,6,276.84,DE
+2026-10-30,Brand Search,All,All,106.59,3322,94,5,140.8,RS
+2026-10-31,Brand Search,All,All,5.99,867,10,0,0.0,US
+2026-10-31,Brand Search,All,All,20.72,1954,41,3,103.46,DE
+2026-10-31,Brand Search,All,All,99.11,2644,104,9,390.4,RS
+2026-11-01,Brand Search,All,All,29.63,1374,38,4,137.2,US
+2026-11-01,Brand Search,All,All,72.72,2077,80,2,78.58,DE
+2026-11-01,Brand Search,All,All,33.43,3792,73,3,114.37,RS
+2026-11-02,Brand Search,All,All,73.24,2306,74,8,385.18,US
+2026-11-02,Brand Search,All,All,50.43,2199,45,4,219.38,DE
+2026-11-02,Brand Search,All,All,76.79,2508,96,3,61.74,RS
+2026-11-03,Brand Search,All,All,66.53,3512,75,6,139.25,US
+2026-11-03,Brand Search,All,All,33.72,3419,46,2,66.41,DE
+2026-11-03,Brand Search,All,All,90.1,3810,117,8,333.2,RS
+2026-10-21,Retargeting,All,All,83.7,2924,95,3,117.71,US
+2026-10-21,Retargeting,All,All,68.61,1742,67,2,92.81,DE
+2026-10-21,Retargeting,All,All,31.4,2791,49,1,47.13,RS
+2026-10-22,Retargeting,All,All,27.63,1629,41,4,228.85,US
+2026-10-22,Retargeting,All,All,97.0,2841,104,6,167.64,DE
+2026-10-22,Retargeting,All,All,48.74,2564,87,8,228.54,RS
+2026-10-23,Retargeting,All,All,23.41,1699,46,2,79.72,US
+2026-10-23,Retargeting,All,All,18.64,966,30,3,80.3,DE
+2026-10-23,Retargeting,All,All,67.08,2645,63,7,247.11,RS
+2026-10-24,Retargeting,All,All,77.13,2929,72,4,237.13,US
+2026-10-24,Retargeting,All,All,32.37,2653,52,5,221.51,DE
+2026-10-24,Retargeting,All,All,71.84,3578,111,9,464.94,RS
+2026-10-25,Retargeting,All,All,13.8,878,25,1,50.77,US
+2026-10-25,Retargeting,All,All,14.0,1891,32,1,45.17,DE
+2026-10-25,Retargeting,All,All,31.01,2628,34,2,69.49,RS
+2026-10-26,Retargeting,All,All,26.52,1119,34,1,27.15,US
+2026-10-26,Retargeting,All,All,11.58,844,27,2,58.12,DE
+2026-10-26,Retargeting,All,All,66.12,3989,81,7,312.05,RS
+2026-10-27,Retargeting,All,All,54.71,3897,57,6,173.74,US
+2026-10-27,Retargeting,All,All,47.37,2481,94,8,305.13,DE
+2026-10-27,Retargeting,All,All,103.32,3362,123,3,138.32,RS
+2026-10-28,Retargeting,All,All,74.01,2858,96,11,506.58,US
+2026-10-28,Retargeting,All,All,21.81,1639,21,2,113.94,DE
+2026-10-28,Retargeting,All,All,24.87,1305,21,2,118.19,RS
+2026-10-29,Retargeting,All,All,71.31,2999,117,13,633.5,US
+2026-10-29,Retargeting,All,All,12.8,864,17,0,0.0,DE
+2026-10-29,Retargeting,All,All,41.37,3946,72,8,437.62,RS
+2026-10-30,Retargeting,All,All,57.45,2556,86,3,154.55,US
+2026-10-30,Retargeting,All,All,36.97,1375,33,3,122.19,DE
+2026-10-30,Retargeting,All,All,86.55,3576,109,12,695.59,RS
+2026-10-31,Retargeting,All,All,31.34,1152,37,2,106.49,US
+2026-10-31,Retargeting,All,All,96.74,3100,90,6,254.39,DE
+2026-10-31,Retargeting,All,All,67.96,2076,62,7,310.64,RS
+2026-11-01,Retargeting,All,All,59.0,2047,72,8,343.36,US
+2026-11-01,Retargeting,All,All,14.54,1623,36,1,35.08,DE
+2026-11-01,Retargeting,All,All,84.29,3004,117,8,416.34,RS
+2026-11-02,Retargeting,All,All,22.4,3105,42,1,57.23,US
+2026-11-02,Retargeting,All,All,68.32,2679,60,6,184.61,DE
+2026-11-02,Retargeting,All,All,75.09,2738,67,4,229.71,RS
+2026-11-03,Retargeting,All,All,51.49,2751,70,2,42.35,US
+2026-11-03,Retargeting,All,All,10.46,1865,25,2,55.53,DE
+2026-11-03,Retargeting,All,All,16.64,1730,17,0,0.0,RS
+2026-11-03,Retargeting,All,All,16.64,1730,17,0,0.0,RS

@@ -16,20 +16,24 @@ export type Field = (typeof ALL_FIELDS)[number];
 export type ColumnMapping = Partial<Record<Field, string>>;
 export const mappingSchema = z.partialRecord(z.enum(ALL_FIELDS), z.string().min(1));
 
+const CURRENCY_SUFFIX = /(?<=[a-z])_(usd|eur|gbp|cad|aud|chf|rsd|inr|jpy|brl|mxn|sek|nok|dkk|pln)$/;
+
 /**
  * "Amount spent (USD)" -> "amount_spent", "Conv. value" -> "conv_value". The currency code in parentheses
  * varies per account, so it is dropped; everything else becomes lowercase words joined by underscores.
  */
 export const normalizeHeader = (s: string) =>
   // Only an upper-case ISO code in parentheses is a currency; "(all)" in "Clicks (all)" is part of the name.
-  s.replace(/\(\s*[A-Z]{3}\s*\)/g, " ").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  s.replace(/\(\s*[A-Z]{3}\s*\)/g, " ").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "")
+    // "spend_usd", "revenue_eur": a currency code as a column suffix is not part of the name either.
+    .replace(CURRENCY_SUFFIX, "");
 
 // Column names used by common exports, in priority order (the first match wins, and a column is used once).
 // The field's own name always has top priority. "Results" in a Meta export is the campaign's chosen result
 // (purchases, leads...), which is the closest thing to our `conversions`.
 const ALIASES: Record<Field, string[]> = {
   date: ["day", "reporting_starts", "reporting_date", "report_date", "segments_date"],
-  campaign: ["campaign_name"],
+  campaign: ["campaign_name", "campaign_id"], // the ID is a fallback label when the file has no name column
   ad_set: ["ad_set_name", "adset", "adset_name", "ad_group", "ad_group_name"],
   ad: ["ad_name", "creative", "creative_name"],
   spend: ["amount_spent", "cost", "total_spend", "total_spent"],
@@ -96,6 +100,9 @@ const dateField = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Date must 
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
 }, "Date does not exist");
 
+const SUMMED = ["spend", "impressions", "clicks", "conversions", "revenue"] as const;
+const round2 = (n: number) => Math.round(n * 100) / 100; // the database stores 2 decimals
+
 const text = (max = 255) => z.string().trim().min(1, "Required field").max(max);
 const decimal = z.string().regex(/^\d+(\.\d+)?$/, "Must be a non-negative number").transform(Number);
 const integer = z.string().regex(/^\d+$/, "Must be a non-negative integer").transform(Number);
@@ -130,6 +137,10 @@ export interface ParsedCsv {
   metrics: Array<AdMetric & { row: number }>;
   errors: ImportRowError[];
   totalRows: number;
+  /** Rows that were added into an earlier row of the same ad and day (breakdown rows) instead of imported on their own. */
+  mergedRows: number;
+  /** Set when the file had no date column and its totals were spread evenly over this period. */
+  spread: { from: string; to: string; days: number } | null;
   detected: Detected;
   /** Identifies the file layout (see headerSignature) so the caller can save a mapping for it. */
   signature: string;
@@ -137,7 +148,28 @@ export interface ParsedCsv {
   effectiveMapping: ColumnMapping;
 }
 
-export function parseCsv(buffer: Buffer, mapping: ColumnMapping = {}, saved: Map<string, ColumnMapping> = new Map()): ParsedCsv {
+/** For files with totals per ad and no date column (e.g. a Meta export without a day breakdown). */
+export interface Period { from: string; to: string }
+export const MAX_PERIOD_DAYS = 366;
+const MAX_SPREAD_ROWS = 200_000;
+
+const DAY_MS = 86_400_000;
+export function periodDays(p: Period): string[] {
+  const from = Date.parse(`${p.from}T00:00:00Z`), to = Date.parse(`${p.to}T00:00:00Z`);
+  const out: string[] = [];
+  for (let t = from; t <= to; t += DAY_MS) out.push(new Date(t).toISOString().slice(0, 10));
+  return out;
+}
+
+/** Splits `total` into `parts` whole units that add up to exactly `total` (the first days get the remainder). */
+const share = (total: number, parts: number, i: number) => {
+  const base = Math.floor(total / parts);
+  return base + (i < total - base * parts ? 1 : 0);
+};
+
+export function parseCsv(
+  buffer: Buffer, mapping: ColumnMapping = {}, saved: Map<string, ColumnMapping> = new Map(), period?: Period,
+): ParsedCsv {
   const content = decode(buffer);
   if (!content.trim()) throw badRequest("The file is empty");
   const delimiter = detectDelimiter(content);
@@ -170,17 +202,23 @@ export function parseCsv(buffer: Buffer, mapping: ColumnMapping = {}, saved: Map
   const kind: DetectedKind = explicit ? "custom" : savedMapping ? "saved" : detectKind(new Set(header.map(normalizeHeader)));
   const detected: Detected = { kind, mapping: effectiveMapping, headerRow: headerAt + 1 };
 
-  const missing = REQUIRED_FIELDS.filter((f) => !colIndex.has(f));
+  // Without a date column the totals are spread over the period the user gives us.
+  const spreading = !colIndex.has("date") && period !== undefined;
+  const missing = REQUIRED_FIELDS.filter((f) => !colIndex.has(f) && !(f === "date" && spreading));
   if (missing.length) {
     throw badRequest(`Missing required columns: ${missing.join(", ")}`, {
-      missing, foundColumns: header, detected: effectiveMapping, hint: "Use the 'mapping' field to map your column names.",
+      missing, foundColumns: header, detected: effectiveMapping,
+      hint: missing.includes("date")
+        ? "Map your date column with the 'mapping' field, or send 'periodFrom' and 'periodTo' (YYYY-MM-DD) if the file has totals for a whole period."
+        : "Use the 'mapping' field to map your column names.",
     });
   }
 
   const decimalComma = delimiter === ";";
   const errors: ImportRowError[] = [];
   const metrics: ParsedCsv["metrics"] = [];
-  const seen = new Map<string, number>();
+  const seen = new Map<string, { metric: ParsedCsv["metrics"][number]; originals: Map<string, number> }>();
+  let mergedRows = 0;
   let totalRows = 0;
   const NUMERIC = new Set<Field>(["spend", "impressions", "clicks", "conversions", "revenue"]);
 
@@ -196,6 +234,7 @@ export function parseCsv(buffer: Buffer, mapping: ColumnMapping = {}, saved: Map
       const v = cells[idx] ?? "";
       raw[f] = NUMERIC.has(f) ? cleanNumber(v, decimalComma) : v;
     }
+    if (spreading) raw.date = period.from; // placeholder; the row is expanded over the period at the end
     const parsed = rowSchema.safeParse(raw);
     if (!parsed.success) {
       for (const issue of parsed.error.issues) {
@@ -216,16 +255,41 @@ export function parseCsv(buffer: Buffer, mapping: ColumnMapping = {}, saved: Map
       spend: r.spend, impressions: r.impressions, clicks: r.clicks,
       conversions: r.conversions, revenue: r.revenue,
     };
-    // The same ad + the same day twice in the file: ambiguous, we do not guess (sum or overwrite?).
+    // The same ad + the same day more than once: exports broken down by country, device or audience have
+    // one row per breakdown value, and the ad-level figure is their sum. A row identical to an earlier one
+    // is more likely a pasted copy than a breakdown, so that one is rejected instead of doubling the numbers.
     const key = [m.campaignExternalId, m.adSetExternalId, m.adExternalId, m.date].join("|");
-    const first = seen.get(key);
-    if (first !== undefined) {
-      errors.push({ row: rowNo, message: `Duplicate: same campaign/ad set/ad and date as row ${first}` });
+    const numbers = SUMMED.map((f) => m[f]).join("|");
+    const prev = seen.get(key);
+    if (prev) {
+      const copyOf = prev.originals.get(numbers); // compared with every earlier row, not with the running sum
+      if (copyOf !== undefined) {
+        errors.push({ row: rowNo, message: `Duplicate: identical to row ${copyOf} (same campaign/ad set/ad, date and numbers)` });
+        return;
+      }
+      prev.originals.set(numbers, rowNo);
+      for (const f of SUMMED) prev.metric[f] = round2(prev.metric[f] + m[f]);
+      mergedRows++;
       return;
     }
-    seen.set(key, rowNo);
+    seen.set(key, { metric: m, originals: new Map([[numbers, rowNo]]) });
     metrics.push(m);
   });
 
-  return { metrics, errors, totalRows, detected, signature, effectiveMapping };
+  if (spreading) {
+    const days = periodDays(period);
+    if (metrics.length * days.length > MAX_SPREAD_ROWS) {
+      throw badRequest(`The file spread over ${days.length} days would create too many rows (max ${MAX_SPREAD_ROWS}); use a shorter period`);
+    }
+    const expanded = metrics.flatMap((m) => days.map((date, i) => ({
+      ...m, date,
+      impressions: share(m.impressions, days.length, i), clicks: share(m.clicks, days.length, i),
+      conversions: share(m.conversions, days.length, i),
+      spend: share(Math.round(m.spend * 100), days.length, i) / 100, revenue: share(Math.round(m.revenue * 100), days.length, i) / 100,
+    })));
+    // share() is monotonic in its total, so clicks <= impressions still holds on every day.
+    metrics.splice(0, metrics.length, ...expanded);
+    return { metrics, errors, totalRows, mergedRows, spread: { ...period, days: days.length }, detected, signature, effectiveMapping };
+  }
+  return { metrics, errors, totalRows, mergedRows, spread: null, detected, signature, effectiveMapping };
 }
