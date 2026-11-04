@@ -1,0 +1,66 @@
+const errorResponse = { description: "Error", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } };
+const authBody = (props: Record<string, unknown>, required: string[]) => ({
+  required: true,
+  content: { "application/json": { schema: { type: "object", required, properties: props } } },
+});
+
+export const openapi = {
+  openapi: "3.0.3",
+  info: { title: "Spendlens API", version: "0.1.0" },
+  components: {
+    securitySchemes: { bearer: { type: "http", scheme: "bearer", bearerFormat: "JWT" } },
+    schemas: {
+      Error: { type: "object", properties: { error: { type: "object", properties: {
+        code: { type: "string" }, message: { type: "string" }, details: {} } } } },
+      AuthResult: { type: "object", properties: {
+        token: { type: "string" },
+        user: { type: "object", properties: { id: { type: "string" }, email: { type: "string" }, name: { type: "string" } } },
+        workspace: { type: "object", properties: { id: { type: "string" }, name: { type: "string" } } } } },
+    },
+  },
+  paths: {
+    "/api/health": { get: { summary: "Service and database health", responses: { "200": { description: "OK" }, "503": { description: "Database unavailable" } } } },
+    "/api/auth/register": { post: { summary: "Register (creates a user and a workspace)",
+      requestBody: authBody({ email: { type: "string" }, password: { type: "string", minLength: 8 }, name: { type: "string" }, workspaceName: { type: "string" } }, ["email", "password", "name", "workspaceName"]),
+      responses: { "201": { description: "Created", content: { "application/json": { schema: { $ref: "#/components/schemas/AuthResult" } } } }, "400": errorResponse, "409": errorResponse } } },
+    "/api/auth/login": { post: { summary: "Log in",
+      requestBody: authBody({ email: { type: "string" }, password: { type: "string" } }, ["email", "password"]),
+      responses: { "200": { description: "OK", content: { "application/json": { schema: { $ref: "#/components/schemas/AuthResult" } } } }, "401": errorResponse } } },
+    "/api/imports/csv": { post: { summary: "Upload a CSV file (multipart: file, optional mapping)", security: [{ bearer: [] }],
+      requestBody: { required: true, content: { "multipart/form-data": { schema: { type: "object", required: ["file"], properties: {
+        file: { type: "string", format: "binary" },
+        mapping: { type: "string", description: 'JSON, npr. {"campaign":"Campaign Name","spend":"Cost"}' } } } } } },
+      responses: { "201": { description: "Import finished (status completed or completed_with_errors)" }, "400": errorResponse, "413": errorResponse, "422": { description: "No row is valid" } } } },
+    "/api/imports/{id}": { get: { summary: "Import status and report", security: [{ bearer: [] }],
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      responses: { "200": { description: "OK" }, "404": errorResponse } } },
+    "/api/analytics/summary": { get: { summary: "KPI overview; compare=true adds the previous period and percentage changes", security: [{ bearer: [] }],
+      parameters: [{ name: "from", in: "query", schema: { type: "string", format: "date" } }, { name: "to", in: "query", schema: { type: "string", format: "date" } }, { name: "campaignIds", in: "query", description: "Comma-separated UUIDs", schema: { type: "string" } }, { name: "compare", in: "query", schema: { type: "boolean" } }],
+      responses: { "200": { description: "totals (spend, impressions, clicks, conversions, revenue, cpm, ctr, cpc, cvr, cpa, roas); null on division by zero" }, "400": errorResponse } } },
+    "/api/analytics/timeseries": { get: { summary: "Metrics per day", security: [{ bearer: [] }],
+      parameters: [{ name: "from", in: "query", schema: { type: "string", format: "date" } }, { name: "to", in: "query", schema: { type: "string", format: "date" } }, { name: "campaignIds", in: "query", schema: { type: "string" } }],
+      responses: { "200": { description: "points[]" }, "400": errorResponse } } },
+    "/api/campaigns": { get: { summary: "Campaign list with metrics, search, sorting and pagination", security: [{ bearer: [] }],
+      parameters: [{ name: "from", in: "query", schema: { type: "string", format: "date" } }, { name: "to", in: "query", schema: { type: "string", format: "date" } }, { name: "search", in: "query", schema: { type: "string" } },
+        { name: "sortBy", in: "query", schema: { type: "string", enum: ["name", "spend", "impressions", "clicks", "conversions", "revenue", "cpm", "ctr", "cpc", "cvr", "cpa", "roas"] } },
+        { name: "order", in: "query", schema: { type: "string", enum: ["asc", "desc"] } },
+        { name: "page", in: "query", schema: { type: "integer" } }, { name: "pageSize", in: "query", schema: { type: "integer", maximum: 100 } }],
+      responses: { "200": { description: "items, total, page, pageSize" }, "400": errorResponse } } },
+    "/api/campaigns/{id}": { get: { summary: "Campaign details: totals, trend, ad sets and ads", security: [{ bearer: [] }],
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }, { name: "from", in: "query", schema: { type: "string", format: "date" } }, { name: "to", in: "query", schema: { type: "string", format: "date" } }],
+      responses: { "200": { description: "OK" }, "404": errorResponse } } },
+    "/api/exports/csv": { get: { summary: "CSV export (level=campaign|daily); same filters and sorting as on screen", security: [{ bearer: [] }],
+      parameters: [{ name: "level", in: "query", schema: { type: "string", enum: ["campaign", "daily"] } }, { name: "from", in: "query", schema: { type: "string", format: "date" } }, { name: "to", in: "query", schema: { type: "string", format: "date" } },
+        { name: "search", in: "query", schema: { type: "string" } }, { name: "sortBy", in: "query", schema: { type: "string" } }, { name: "order", in: "query", schema: { type: "string", enum: ["asc", "desc"] } }],
+      responses: { "200": { description: "text/csv (UTF-8 with BOM); cells starting with = + - @ are neutralized" }, "400": errorResponse } } },
+    "/api/ai/insights": { post: { summary: "AI analysis: rule-based findings + LLM wording (falls back to the rules)", security: [{ bearer: [] }],
+      requestBody: { required: false, content: { "application/json": { schema: { type: "object", properties: { from: { type: "string", format: "date" }, to: { type: "string", format: "date" }, campaignIds: { type: "string" } } } } } },
+      responses: { "200": { description: "source (llm|rules), model, cached, notice, findings[] with evidence, insights {summary, observations, recommendations[{action, reason, basedOn}]}" }, "400": errorResponse } } },
+    "/api/ai/ask": { post: { summary: "Ask your data: a question in plain English, answered by a model that can only call whitelisted read-only tools scoped to your workspace", security: [{ bearer: [] }],
+      requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["question"], properties: {
+        question: { type: "string", minLength: 3, maxLength: 500 }, from: { type: "string", format: "date" }, to: { type: "string", format: "date" } } } } } },
+      responses: { "200": { description: "answer, source (llm|data), verified (every number found in the tool results), steps (tools called), notice (NO_API_KEY|RATE_LIMITED|LLM_UNAVAILABLE|LLM_REJECTED|NO_DATA)" }, "400": errorResponse, "401": errorResponse } } },
+    "/api/workspaces/current": { get: { summary: "Current workspace", security: [{ bearer: [] }],
+      responses: { "200": { description: "OK" }, "401": errorResponse, "403": errorResponse } } },
+  },
+};
