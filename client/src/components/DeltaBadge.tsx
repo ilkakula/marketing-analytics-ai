@@ -12,8 +12,10 @@ export function DeltaBadge({ metric, change }: { metric: MetricKey; change: numb
   const tone = dir === "flat" || polarity === "neutral" ? "neutral" : dir === polarity ? "good" : "bad";
   const Icon = dir === "up" ? ArrowUpRight : dir === "down" ? ArrowDownRight : Minus;
   const text = `${change > 0 ? "+" : ""}${new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(change)}%`;
+  const verdict = tone === "good" ? "better" : tone === "bad" ? "worse" : "no good or bad direction";
+  const why = polarity === "down" ? "a lower value is better for this metric" : polarity === "up" ? "a higher value is better for this metric" : "";
   return (
-    <Badge tone={tone}>
+    <Badge tone={tone} title={`${text} versus the previous period of the same length: ${verdict}${why ? ` (${why})` : ""}`}>
       <Icon className="size-3" aria-hidden /> {text}
       <span className="sr-only"> versus the previous period</span>
     </Badge>

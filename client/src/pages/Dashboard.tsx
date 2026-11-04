@@ -42,9 +42,9 @@ export function Dashboard() {
       ) : (
         <>
           <KpiGrid totals={s.totals} change={s.change} points={series.data.points} />
+          <TimeseriesChart points={series.data.points} />
           <AiInsightsPanel />
           <AskPanel />
-          <TimeseriesChart points={series.data.points} />
           <Card className="animate-fade-up">
             <CardHeader>
               <CardTitle>Campaigns with the highest spend</CardTitle>

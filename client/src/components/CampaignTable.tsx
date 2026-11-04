@@ -52,10 +52,10 @@ export function MetricsTable({ rows, nameHeader, linkBase, sort, selection }: Pr
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.id} className="border-b border-line transition-colors last:border-0 hover:bg-surface-2">
+            <tr key={r.id} className="h-12 border-b border-line transition-colors last:border-0 hover:bg-surface-2">
               {selection && (
-                <td className="px-3 py-3">
-                  <input type="checkbox" className="size-4 cursor-pointer accent-[var(--accent)]" aria-label={`Select ${r.name} for comparison`}
+                <td className="px-3 py-2 align-middle">
+                  <input type="checkbox" className="block size-4 cursor-pointer accent-[var(--accent)]" aria-label={`Select ${r.name} for comparison`}
                     checked={selection.ids.has(r.id)}
                     disabled={!selection.ids.has(r.id) && selection.ids.size >= selection.max}
                     onChange={() => selection.onToggle(r.id)} />

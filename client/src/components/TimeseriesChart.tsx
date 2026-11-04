@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select } from "@/components/ui/input";
@@ -8,6 +8,18 @@ import { cn } from "@/lib/cn";
 import { compact, longDate, shortDate } from "@/lib/format";
 import { METRIC_LABEL } from "@/lib/metricsMeta";
 import type { MetricKey, Point } from "@/lib/types";
+
+// Fewer x-axis labels on narrow screens, so dates never overlap.
+function useNarrow() {
+  const [narrow, setNarrow] = useState(() => matchMedia("(max-width: 640px)").matches);
+  useEffect(() => {
+    const mq = matchMedia("(max-width: 640px)");
+    const on = () => setNarrow(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return narrow;
+}
 
 type Mode = "spend_revenue" | MetricKey;
 const MODES: Mode[] = ["spend_revenue", "roas", "conversions", "clicks", "impressions", "ctr", "cpc", "cpa"];
@@ -38,6 +50,7 @@ export function TimeseriesChart({ points }: { points: Point[] }) {
   const [asTable, setAsTable] = useState(false);
   const [hidden, setHidden] = useState<Set<MetricKey>>(new Set());
   const fmt = useFmt();
+  const narrow = useNarrow();
   const data = useMemo(() => fillGaps(points), [points]);
   const all = seriesFor(mode);
   const series = all.filter((s) => !hidden.has(s.key));
@@ -51,7 +64,7 @@ export function TimeseriesChart({ points }: { points: Point[] }) {
 
   return (
     <Card className="animate-fade-up">
-      <CardHeader>
+      <CardHeader className="flex-wrap">
         <div>
           <CardTitle>{modeLabel(mode)} per day</CardTitle>
           <p className="mt-0.5 text-xs text-ink-2">Daily totals for the selected period</p>
@@ -59,7 +72,7 @@ export function TimeseriesChart({ points }: { points: Point[] }) {
         <div className="flex items-center gap-2">
           <Segmented<"chart" | "table"> label="View" value={asTable ? "table" : "chart"}
             options={[{ value: "chart", label: "Chart" }, { value: "table", label: "Table" }]} onChange={(v) => setAsTable(v === "table")} />
-          <Select className="w-44" aria-label="Metric" value={mode} onChange={(e) => { setMode(e.target.value as Mode); setHidden(new Set()); }}>
+          <Select className="w-full sm:w-44" aria-label="Metric" value={mode} onChange={(e) => { setMode(e.target.value as Mode); setHidden(new Set()); }}>
             {MODES.map((m) => <option key={m} value={m}>{modeLabel(m)}</option>)}
           </Select>
         </div>
@@ -111,7 +124,7 @@ export function TimeseriesChart({ points }: { points: Point[] }) {
                 </defs>
                 <CartesianGrid vertical={false} stroke="var(--grid)" />
                 <XAxis dataKey="date" tickFormatter={shortDate} tick={{ fill: "var(--muted)", fontSize: 12 }}
-                  axisLine={{ stroke: "var(--axis)" }} tickLine={false} minTickGap={32} />
+                  axisLine={{ stroke: "var(--axis)" }} tickLine={false} interval={Math.max(0, Math.ceil(data.length / (narrow ? 4 : 8)) - 1)} />
                 <YAxis tickFormatter={(v: number) => compact(v)} tick={{ fill: "var(--muted)", fontSize: 12 }}
                   axisLine={false} tickLine={false} width={48} />
                 <Tooltip

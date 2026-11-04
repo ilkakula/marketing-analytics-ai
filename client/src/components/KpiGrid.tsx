@@ -17,6 +17,7 @@ export function KpiGrid({
 }: { totals: Metrics; change?: Record<MetricKey, number | null>; points: Point[] }) {
   const fmt = useFmt();
   return (
+    <>
     <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
       {KPI_KEYS.map((k) => {
         const Icon = ICONS[k] ?? Eye;
@@ -38,6 +39,13 @@ export function KpiGrid({
         );
       })}
     </div>
+    {change && (
+      <p className="text-xs text-muted">
+        Arrows compare with the previous period of the same length. Green is better, red is worse: more revenue is green,
+        but a higher CPC or CPA is red. Spend has no good or bad direction.
+      </p>
+    )}
+    </>
   );
 }
 
