@@ -1,0 +1,9 @@
+date,campaign,ad_set,ad,spend,impressions,clicks,conversions,revenue
+2026-11-02,"Brand, ""Premium"" (Q4)",Set 1,Ad 1,40,4000,80,3,150
+2026-11-02,"=HYPERLINK(""http://example.com"",""click"")",Set 1,Ad 1,25,2500,40,1,60
+2026-11-02,+SUM(1+1),Set 1,Ad 1,10,1000,10,0,0
+2026-11-02,Zero Spend Test,Set 1,Ad 1,0,1000,0,0,0
+2026-11-02,Zero Impressions Test,Set 1,Ad 1,15,0,0,0,0
+2026-11-03,Unicode Test – Ünïcödé 広告,Set 1,Ad 1,30,3000,60,2,90
+2026-11-03,  spaced   name  ,Set 1,Ad 1,30,3000,60,2,90
+2026-11-03,Very long campaign name Very long campaign name Very long campaign name Very long campaign name Very long campaign name Very long campaign name Very long campaign name Very long campaign name x,Set 1,Ad 1,30,3000,60,2,90

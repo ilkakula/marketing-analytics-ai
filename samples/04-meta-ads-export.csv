@@ -1,0 +1,169 @@
+Day,Campaign name,Ad set name,Ad name,Amount spent (USD),Impressions,Link clicks,Results,Purchase conversion value
+2026-10-21,Meta - Spring Launch,Lookalike 1%,Video 15s,28.35,3149,46,1,73.58
+2026-10-21,Meta - Spring Launch,Lookalike 1%,Carousel,33.75,3749,62,2,126.68
+2026-10-21,Meta - Spring Launch,Interests,Video 15s,27.6,3067,48,1,76.35
+2026-10-21,Meta - Spring Launch,Interests,Carousel,28.98,3219,47,1,69.91
+2026-10-21,Meta - Retargeting Cart,Lookalike 1%,Video 15s,16.93,705,22,2,178.11
+2026-10-21,Meta - Retargeting Cart,Lookalike 1%,Carousel,16.45,685,25,2,164.15
+2026-10-21,Meta - Retargeting Cart,Interests,Video 15s,14.19,591,19,1,77.84
+2026-10-21,Meta - Retargeting Cart,Interests,Carousel,13.64,568,21,1,77.6
+2026-10-21,Meta - Brand Search,Lookalike 1%,Video 15s,17.2,614,31,2,142.49
+2026-10-21,Meta - Brand Search,Lookalike 1%,Carousel,22.3,796,45,2,119.19
+2026-10-21,Meta - Brand Search,Interests,Video 15s,17.58,627,31,2,128.62
+2026-10-21,Meta - Brand Search,Interests,Carousel,18.41,657,32,2,134.53
+2026-10-22,Meta - Spring Launch,Lookalike 1%,Video 15s,32.23,3581,63,2,129.39
+2026-10-22,Meta - Spring Launch,Lookalike 1%,Carousel,33.07,3674,55,1,68.22
+2026-10-22,Meta - Spring Launch,Interests,Video 15s,32.14,3571,51,1,66.43
+2026-10-22,Meta - Spring Launch,Interests,Carousel,26.88,2986,53,1,67.57
+2026-10-22,Meta - Retargeting Cart,Lookalike 1%,Video 15s,14.53,605,24,2,160.87
+2026-10-22,Meta - Retargeting Cart,Lookalike 1%,Carousel,16.39,682,24,2,156.48
+2026-10-22,Meta - Retargeting Cart,Interests,Video 15s,14.89,620,23,2,184.09
+2026-10-22,Meta - Retargeting Cart,Interests,Carousel,12.93,538,17,1,79.72
+2026-10-22,Meta - Brand Search,Lookalike 1%,Video 15s,22.84,815,41,3,190.02
+2026-10-22,Meta - Brand Search,Lookalike 1%,Carousel,22.2,792,38,2,137.22
+2026-10-22,Meta - Brand Search,Interests,Video 15s,22.67,809,35,2,133.12
+2026-10-22,Meta - Brand Search,Interests,Carousel,18.31,653,31,1,61.15
+2026-10-23,Meta - Spring Launch,Lookalike 1%,Video 15s,27.79,3088,50,1,65.85
+2026-10-23,Meta - Spring Launch,Lookalike 1%,Carousel,25.6,2844,43,1,65.59
+2026-10-23,Meta - Spring Launch,Interests,Video 15s,28.31,3145,45,1,70.67
+2026-10-23,Meta - Spring Launch,Interests,Carousel,26.07,2896,40,1,70.7
+2026-10-23,Meta - Retargeting Cart,Lookalike 1%,Video 15s,15.63,651,19,1,88.32
+2026-10-23,Meta - Retargeting Cart,Lookalike 1%,Carousel,14.59,608,19,1,92.7
+2026-10-23,Meta - Retargeting Cart,Interests,Video 15s,14.16,589,21,1,83.58
+2026-10-23,Meta - Retargeting Cart,Interests,Carousel,16.64,693,27,2,159.7
+2026-10-23,Meta - Brand Search,Lookalike 1%,Video 15s,21.37,763,34,1,70.22
+2026-10-23,Meta - Brand Search,Lookalike 1%,Carousel,19.54,697,38,2,139.95
+2026-10-23,Meta - Brand Search,Interests,Video 15s,19.77,705,31,1,65.67
+2026-10-23,Meta - Brand Search,Interests,Carousel,20.84,744,41,2,133.18
+2026-10-24,Meta - Spring Launch,Lookalike 1%,Video 15s,28.84,3204,51,1,66.97
+2026-10-24,Meta - Spring Launch,Lookalike 1%,Carousel,30.19,3354,60,1,69.87
+2026-10-24,Meta - Spring Launch,Interests,Video 15s,32.74,3638,66,2,129.55
+2026-10-24,Meta - Spring Launch,Interests,Carousel,33.99,3776,69,2,127.49
+2026-10-24,Meta - Retargeting Cart,Lookalike 1%,Video 15s,16.92,704,23,2,174.09
+2026-10-24,Meta - Retargeting Cart,Lookalike 1%,Carousel,16.46,685,21,2,160.55
+2026-10-24,Meta - Retargeting Cart,Interests,Video 15s,14.57,607,23,2,159.22
+2026-10-24,Meta - Retargeting Cart,Interests,Carousel,13.73,572,19,1,83.02
+2026-10-24,Meta - Brand Search,Lookalike 1%,Video 15s,17.74,633,29,2,140.33
+2026-10-24,Meta - Brand Search,Lookalike 1%,Carousel,17.25,615,31,2,117.99
+2026-10-24,Meta - Brand Search,Interests,Video 15s,22.03,786,34,2,131.3
+2026-10-24,Meta - Brand Search,Interests,Carousel,20.76,741,34,2,132.15
+2026-10-25,Meta - Spring Launch,Lookalike 1%,Video 15s,29.33,3259,54,1,69.14
+2026-10-25,Meta - Spring Launch,Lookalike 1%,Carousel,25.71,2856,47,1,66.29
+2026-10-25,Meta - Spring Launch,Interests,Video 15s,32.37,3596,62,2,131.03
+2026-10-25,Meta - Spring Launch,Interests,Carousel,29.76,3306,46,1,69.03
+2026-10-25,Meta - Retargeting Cart,Lookalike 1%,Video 15s,13.16,548,18,1,77.19
+2026-10-25,Meta - Retargeting Cart,Lookalike 1%,Carousel,15.61,650,19,1,89.72
+2026-10-25,Meta - Retargeting Cart,Interests,Video 15s,15.05,627,19,1,82.92
+2026-10-25,Meta - Retargeting Cart,Interests,Carousel,17.03,709,22,2,186.87
+2026-10-25,Meta - Brand Search,Lookalike 1%,Video 15s,21.39,764,41,2,142.52
+2026-10-25,Meta - Brand Search,Lookalike 1%,Carousel,19.95,712,40,3,181.94
+2026-10-25,Meta - Brand Search,Interests,Video 15s,21.73,776,43,2,126.12
+2026-10-25,Meta - Brand Search,Interests,Carousel,21.54,769,34,2,124.15
+2026-10-26,Meta - Spring Launch,Lookalike 1%,Video 15s,32.84,3648,52,1,75.88
+2026-10-26,Meta - Spring Launch,Lookalike 1%,Carousel,27.37,3041,45,1,67.47
+2026-10-26,Meta - Spring Launch,Interests,Video 15s,25.83,2870,41,1,76.11
+2026-10-26,Meta - Spring Launch,Interests,Carousel,31.62,3513,62,1,73.99
+2026-10-26,Meta - Retargeting Cart,Lookalike 1%,Video 15s,13.27,552,19,1,82.62
+2026-10-26,Meta - Retargeting Cart,Lookalike 1%,Carousel,16.68,694,24,2,183.01
+2026-10-26,Meta - Retargeting Cart,Interests,Video 15s,13.22,550,22,2,166.4
+2026-10-26,Meta - Retargeting Cart,Interests,Carousel,16.34,680,22,2,172.63
+2026-10-26,Meta - Brand Search,Lookalike 1%,Video 15s,19.16,684,36,2,121.6
+2026-10-26,Meta - Brand Search,Lookalike 1%,Carousel,21.46,766,33,2,123.59
+2026-10-26,Meta - Brand Search,Interests,Video 15s,20.84,744,42,3,201.38
+2026-10-26,Meta - Brand Search,Interests,Carousel,18.88,674,28,1,60.44
+2026-10-27,Meta - Spring Launch,Lookalike 1%,Video 15s,31.04,3449,54,1,75.54
+2026-10-27,Meta - Spring Launch,Lookalike 1%,Carousel,26.69,2965,43,1,63.31
+2026-10-27,Meta - Spring Launch,Interests,Video 15s,25.52,2835,43,1,68.0
+2026-10-27,Meta - Spring Launch,Interests,Carousel,27.52,3057,50,1,65.86
+2026-10-27,Meta - Retargeting Cart,Lookalike 1%,Video 15s,15.56,648,22,1,92.42
+2026-10-27,Meta - Retargeting Cart,Lookalike 1%,Carousel,13.85,576,18,1,87.35
+2026-10-27,Meta - Retargeting Cart,Interests,Video 15s,16.67,694,26,2,161.98
+2026-10-27,Meta - Retargeting Cart,Interests,Carousel,12.8,533,19,1,82.46
+2026-10-27,Meta - Brand Search,Lookalike 1%,Video 15s,20.87,745,36,2,136.07
+2026-10-27,Meta - Brand Search,Lookalike 1%,Carousel,18.49,660,36,2,130.82
+2026-10-27,Meta - Brand Search,Interests,Video 15s,19.44,694,31,1,68.63
+2026-10-27,Meta - Brand Search,Interests,Carousel,17.07,609,30,2,120.7
+2026-10-28,Meta - Spring Launch,Lookalike 1%,Video 15s,27.3,3032,50,1,71.98
+2026-10-28,Meta - Spring Launch,Lookalike 1%,Carousel,32.82,3646,52,1,67.2
+2026-10-28,Meta - Spring Launch,Interests,Video 15s,25.94,2881,51,1,73.02
+2026-10-28,Meta - Spring Launch,Interests,Carousel,25.56,2839,50,1,69.51
+2026-10-28,Meta - Retargeting Cart,Lookalike 1%,Video 15s,16.09,670,23,1,78.29
+2026-10-28,Meta - Retargeting Cart,Lookalike 1%,Carousel,13.8,574,17,1,89.24
+2026-10-28,Meta - Retargeting Cart,Interests,Video 15s,15.88,661,25,2,162.04
+2026-10-28,Meta - Retargeting Cart,Interests,Carousel,15.24,635,21,2,170.79
+2026-10-28,Meta - Brand Search,Lookalike 1%,Video 15s,18.59,663,34,2,122.64
+2026-10-28,Meta - Brand Search,Lookalike 1%,Carousel,22.28,795,33,2,123.14
+2026-10-28,Meta - Brand Search,Interests,Video 15s,21.46,766,43,3,188.25
+2026-10-28,Meta - Brand Search,Interests,Carousel,22.28,795,37,2,140.6
+2026-10-29,Meta - Spring Launch,Lookalike 1%,Video 15s,31.18,3464,58,2,153.41
+2026-10-29,Meta - Spring Launch,Lookalike 1%,Carousel,29.73,3302,58,2,150.01
+2026-10-29,Meta - Spring Launch,Interests,Video 15s,29.43,3270,55,1,67.31
+2026-10-29,Meta - Spring Launch,Interests,Carousel,27.41,3045,50,1,75.75
+2026-10-29,Meta - Retargeting Cart,Lookalike 1%,Video 15s,13.4,558,16,1,92.29
+2026-10-29,Meta - Retargeting Cart,Lookalike 1%,Carousel,14.3,595,18,1,77.21
+2026-10-29,Meta - Retargeting Cart,Interests,Video 15s,15.87,661,24,2,178.05
+2026-10-29,Meta - Retargeting Cart,Interests,Carousel,13.05,543,19,1,90.4
+2026-10-29,Meta - Brand Search,Lookalike 1%,Video 15s,21.92,782,43,2,139.56
+2026-10-29,Meta - Brand Search,Lookalike 1%,Carousel,22.49,803,45,2,122.35
+2026-10-29,Meta - Brand Search,Interests,Video 15s,17.67,631,27,2,138.11
+2026-10-29,Meta - Brand Search,Interests,Carousel,20.81,743,40,2,124.47
+2026-10-30,Meta - Spring Launch,Lookalike 1%,Video 15s,26.4,2933,41,1,65.87
+2026-10-30,Meta - Spring Launch,Lookalike 1%,Carousel,28.37,3152,49,1,66.59
+2026-10-30,Meta - Spring Launch,Interests,Video 15s,28.04,3115,53,1,67.49
+2026-10-30,Meta - Spring Launch,Interests,Carousel,34.18,3797,60,2,143.31
+2026-10-30,Meta - Retargeting Cart,Lookalike 1%,Video 15s,12.89,537,18,1,89.64
+2026-10-30,Meta - Retargeting Cart,Lookalike 1%,Carousel,14.31,596,22,2,160.36
+2026-10-30,Meta - Retargeting Cart,Interests,Video 15s,16.63,692,21,2,158.79
+2026-10-30,Meta - Retargeting Cart,Interests,Carousel,12.76,531,16,1,93.12
+2026-10-30,Meta - Brand Search,Lookalike 1%,Video 15s,17.03,608,30,2,137.72
+2026-10-30,Meta - Brand Search,Lookalike 1%,Carousel,18.11,646,32,2,138.63
+2026-10-30,Meta - Brand Search,Interests,Video 15s,18.56,662,37,2,122.58
+2026-10-30,Meta - Brand Search,Interests,Carousel,21.2,757,37,2,133.55
+2026-10-31,Meta - Spring Launch,Lookalike 1%,Video 15s,26.23,2914,50,1,74.02
+2026-10-31,Meta - Spring Launch,Lookalike 1%,Carousel,31.15,3461,52,1,68.52
+2026-10-31,Meta - Spring Launch,Interests,Video 15s,33.51,3723,52,2,126.7
+2026-10-31,Meta - Spring Launch,Interests,Carousel,27.36,3039,45,1,70.02
+2026-10-31,Meta - Retargeting Cart,Lookalike 1%,Video 15s,14.46,602,23,1,84.34
+2026-10-31,Meta - Retargeting Cart,Lookalike 1%,Carousel,15.14,630,23,2,174.97
+2026-10-31,Meta - Retargeting Cart,Interests,Video 15s,14.32,596,19,1,90.83
+2026-10-31,Meta - Retargeting Cart,Interests,Carousel,15.73,655,24,1,83.96
+2026-10-31,Meta - Brand Search,Lookalike 1%,Video 15s,21.64,772,39,2,129.01
+2026-10-31,Meta - Brand Search,Lookalike 1%,Carousel,22.31,796,36,2,124.84
+2026-10-31,Meta - Brand Search,Interests,Video 15s,21.22,757,41,2,121.06
+2026-10-31,Meta - Brand Search,Interests,Carousel,18.49,660,31,2,121.18
+2026-11-01,Meta - Spring Launch,Lookalike 1%,Video 15s,28.45,3161,45,1,73.2
+2026-11-01,Meta - Spring Launch,Lookalike 1%,Carousel,26.42,2935,53,1,68.38
+2026-11-01,Meta - Spring Launch,Interests,Video 15s,34.35,3817,66,2,138.18
+2026-11-01,Meta - Spring Launch,Interests,Carousel,27.27,3029,50,1,65.89
+2026-11-01,Meta - Retargeting Cart,Lookalike 1%,Video 15s,14.5,604,18,1,89.95
+2026-11-01,Meta - Retargeting Cart,Lookalike 1%,Carousel,15.87,661,23,2,168.75
+2026-11-01,Meta - Retargeting Cart,Interests,Video 15s,13.39,557,20,1,89.1
+2026-11-01,Meta - Retargeting Cart,Interests,Carousel,16.84,701,24,2,178.47
+2026-11-01,Meta - Brand Search,Lookalike 1%,Video 15s,19.53,697,32,2,139.88
+2026-11-01,Meta - Brand Search,Lookalike 1%,Carousel,21.64,773,40,3,202.0
+2026-11-01,Meta - Brand Search,Interests,Video 15s,20.85,744,36,2,133.34
+2026-11-01,Meta - Brand Search,Interests,Carousel,17.59,628,30,2,135.54
+2026-11-02,Meta - Spring Launch,Lookalike 1%,Video 15s,31.17,3462,51,1,69.37
+2026-11-02,Meta - Spring Launch,Lookalike 1%,Carousel,31.09,3454,53,1,76.02
+2026-11-02,Meta - Spring Launch,Interests,Video 15s,27.15,3016,50,1,68.44
+2026-11-02,Meta - Spring Launch,Interests,Carousel,29.91,3323,60,1,70.61
+2026-11-02,Meta - Retargeting Cart,Lookalike 1%,Video 15s,13.47,561,21,2,170.65
+2026-11-02,Meta - Retargeting Cart,Lookalike 1%,Carousel,13.2,550,19,1,88.69
+2026-11-02,Meta - Retargeting Cart,Interests,Video 15s,15.05,627,22,2,170.74
+2026-11-02,Meta - Retargeting Cart,Interests,Carousel,14.6,608,24,1,88.13
+2026-11-02,Meta - Brand Search,Lookalike 1%,Video 15s,19.35,691,37,2,142.6
+2026-11-02,Meta - Brand Search,Lookalike 1%,Carousel,19.13,683,29,1,63.7
+2026-11-02,Meta - Brand Search,Interests,Video 15s,17.08,609,29,1,67.58
+2026-11-02,Meta - Brand Search,Interests,Carousel,19.11,682,31,1,68.14
+2026-11-03,Meta - Spring Launch,Lookalike 1%,Video 15s,33.96,3773,60,1,74.22
+2026-11-03,Meta - Spring Launch,Lookalike 1%,Carousel,29.03,3225,47,1,73.87
+2026-11-03,Meta - Spring Launch,Interests,Video 15s,32.79,3642,60,2,141.74
+2026-11-03,Meta - Spring Launch,Interests,Carousel,27.53,3059,55,1,71.94
+2026-11-03,Meta - Retargeting Cart,Lookalike 1%,Video 15s,16.43,684,26,2,163.01
+2026-11-03,Meta - Retargeting Cart,Lookalike 1%,Carousel,15.22,634,19,1,82.53
+2026-11-03,Meta - Retargeting Cart,Interests,Video 15s,16.58,690,22,1,80.81
+2026-11-03,Meta - Retargeting Cart,Interests,Carousel,14.67,611,19,1,88.77
+2026-11-03,Meta - Brand Search,Lookalike 1%,Video 15s,18.69,667,30,1,64.73
+2026-11-03,Meta - Brand Search,Lookalike 1%,Carousel,19.57,698,36,2,126.42
+2026-11-03,Meta - Brand Search,Interests,Video 15s,22.57,806,44,2,138.53
+2026-11-03,Meta - Brand Search,Interests,Carousel,22.43,801,43,2,138.61

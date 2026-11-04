@@ -1,0 +1,14 @@
+date,campaign,ad_set,ad,spend,impressions,clicks,conversions,revenue
+2026-10-25,Valid Campaign,Set 1,Ad 1,44.18,4418,76,3,182.98
+2026-10-26,Valid Campaign,Set 1,Ad 1,48.32,4832,88,3,162.38
+2026-10-27,Valid Campaign,Set 1,Ad 1,47.02,4702,92,4,246.94
+2026-10-28,Valid Campaign,Set 1,Ad 1,55.76,5575,110,3,170.89
+2026-13-45,Valid Campaign,Set 1,Ad 1,50,5000,100,4,200
+2026-10-30,Valid Campaign,Set 1,Ad 1,-20,5000,100,4,200
+2026-10-30,Valid Campaign,Set 1,Ad 2,abc,5000,100,4,200
+2026-10-31,Valid Campaign,Set 1,Ad 1,50,100,900,4,200
+2026-10-31,,Set 1,Ad 1,50,5000,100,4,200
+2026-11-01,Valid Campaign,Set 1,Ad 1,50,5000,100,4.5,200
+2026-11-02,Valid Campaign,Set 1,Ad 1,56.91,5690,120,4,217.05
+2026-11-02,Valid Campaign,Set 1,Ad 1,49.97,4997,105,4,228.35
+2026-11-03,Valid Campaign,Set 1,Ad 1,52.51,5251,118,4,217.64
