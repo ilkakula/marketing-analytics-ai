@@ -1,0 +1,53 @@
+name: spendlens
+# Database only, for development:  docker compose up -d postgres   (then npm run dev:server / dev:client)
+# Full stack:                       docker compose up --build        (app on http://localhost:8080)
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: spendlens
+      POSTGRES_PASSWORD: spendlens
+      POSTGRES_DB: spendlens
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spendlens -d spendlens"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "4750"
+      # Inside the Docker network the database is reached by service name, not localhost.
+      DATABASE_URL: postgres://spendlens:spendlens@postgres:5432/spendlens
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env (at least 32 characters)}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # nginx is one reverse proxy in front of the server: we trust its X-Forwarded-For (the real client IP).
+      TRUST_PROXY_HOPS: "1"
+      GEMINI_MODELS: ${GEMINI_MODELS:-gemini-3.5-flash-lite,gemini-3.8-flash}
+    restart: unless-stopped
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    depends_on:
+      server:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
