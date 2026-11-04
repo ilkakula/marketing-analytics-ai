@@ -9,12 +9,12 @@ plain-language findings and recommendations in which every number is checked aga
 
 | | |
 |---|---|
-| **Import** | CSV upload with column mapping, per-row error reports (row, column, reason) and idempotent re-imports. Handles `;` separators, decimal commas and BOMs. |
+| **Import** | CSV upload with column mapping, per-row error reports (row, column, reason) and idempotent re-imports. Handles `;` separators, decimal commas and BOMs. Import history with deletion of an import's data. |
 | **Overview** | Spend, revenue, ROAS, conversions, CPA, CTR, CPC and clicks, each compared with the previous period and shown with a trend line. |
 | **Campaigns** | Search, sort by any metric, per-campaign details (ad sets and ads), side-by-side comparison of up to four campaigns, CSV export protected against formula injection. |
 | **AI insights** | A deterministic rules engine finds the problems (campaign losing money, CPC spike, conversion decline, runaway budget, broken tracking). An LLM explains them. |
 | **Ask your data** | Plain-English questions answered through function calling over a few read-only, workspace-scoped tools. |
-| **Multi-tenant** | Every workspace is isolated; each route is covered by isolation tests. |
+| **Multi-tenant** | Every workspace is isolated; each route is covered by isolation tests. Workspace settings (name, currency). |
 
 | AI insights | Ask your data |
 |---|---|
@@ -96,5 +96,5 @@ samples/         sample CSV files
 
 ## Status and limitations
 Built as an MVP and suited to a supervised pilot. Not yet in place: password reset, multiple users and workspaces per account,
-import history and undo, automatic data connectors (Meta/Google Ads), and a privacy setup for sending client data to a paid LLM tier.
+automatic data connectors (Meta/Google Ads), and a privacy setup for sending client data to a paid LLM tier.
 The AI evaluation uses synthetic data; behavior on real accounts still has to be validated.
