@@ -21,7 +21,7 @@ export interface AskResult {
   notice?: AskNotice;
 }
 
-export interface AskInput { workspaceId: string; currency: string; question: string; from?: string; to?: string }
+export interface AskInput { workspaceId: string; currency: string; targetRoas?: number; question: string; from?: string; to?: string }
 export interface AskDeps { port: AnalyticsPort; provider: LlmProvider | null; now?: Date; log?: (m: string) => void }
 
 const MAX_ROUNDS = 4;       // tool-calling rounds per attempt
@@ -74,10 +74,10 @@ export function validateAnswer(text: string, facts: Array<{ tool: string; result
 }
 
 export async function askQuestion({ port, provider, now = new Date(), log = console.warn }: AskDeps, input: AskInput): Promise<AskResult> {
-  const { workspaceId, currency, question, from, to } = input;
+  const { workspaceId, currency, targetRoas, question, from, to } = input;
   const base = { question, generatedAt: new Date().toISOString(), cached: false, steps: [] as AskStep[] };
   const dataOnly = async (notice: AskNotice, steps: AskStep[] = [], facts?: AskResult["facts"], extra = ""): Promise<AskResult> => {
-    const { findings, totals } = await analyzePeriod(port, { workspaceId, from, to });
+    const { findings, totals } = await analyzePeriod(port, { workspaceId, from, to }, { roas: targetRoas });
     const summary = rulesInsights(findings, totals, currency).summary;
     return { ...base, steps, ...(facts?.length ? { facts } : {}), source: "data", verified: false, notice, answer: `${extra}${summary}`.trim() };
   };
@@ -95,7 +95,7 @@ export async function askQuestion({ port, provider, now = new Date(), log = cons
 
   const range = await port.dataRange(workspaceId);
   const system = buildSystemPrompt({ today: now.toISOString().slice(0, 10), dataFrom: range.from, dataTo: range.to, from, to, currency });
-  const ctx: ToolContext = { port, workspaceId, currency, defaults: { from, to } };
+  const ctx: ToolContext = { port, workspaceId, currency, targetRoas, defaults: { from, to } };
 
   const contents: Content[] = [{ role: "user", parts: [{ text: question }] }];
   const steps: AskStep[] = [];

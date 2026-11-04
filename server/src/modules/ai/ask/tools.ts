@@ -17,6 +17,7 @@ export interface ToolContext {
   port: AnalyticsPort;
   workspaceId: string;
   currency: string;
+  targetRoas?: number;
   defaults: { from?: string; to?: string }; // the period selected in the UI
 }
 
@@ -130,7 +131,7 @@ async function execute(name: ToolName, raw: unknown, ctx: ToolContext): Promise<
     case "get_findings": {
       const a = schemas.get_findings.parse(raw);
       const f = filtersFor(ctx, a);
-      const { findings } = await analyzePeriod(ctx.port, f);
+      const { findings } = await analyzePeriod(ctx.port, f, { roas: ctx.targetRoas });
       return {
         period: { from: f.from ?? null, to: f.to ?? null },
         findings: findings.map((x) => ({ id: x.id, type: x.type, severity: x.severity, campaign: x.campaignName, ...(x.date ? { date: x.date } : {}), message: describe(x, ctx.currency).message, evidence: x.evidence })),

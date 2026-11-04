@@ -18,7 +18,7 @@ export interface CampaignList { items: CampaignRow[]; total: number; page: numbe
 export interface CampaignDetail {
   id: string; name: string; totals: Metrics; timeseries: Point[]; adSets: BreakdownRow[]; ads: BreakdownRow[];
 }
-export interface Workspace { id: string; name: string; currency: string; timezone: string }
+export interface Workspace { id: string; name: string; currency: string; timezone: string; targetRoas: number }
 export interface ImportJob {
   id: string; filename: string; status: "completed" | "completed_with_errors" | "failed" | "undone";
   totalRows: number; rowsImported: number; rowsFailed: number;

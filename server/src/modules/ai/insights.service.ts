@@ -30,8 +30,9 @@ export async function generateInsights(
   const { workspaceId, from, to } = filters;
   const ws = await Workspace.findByPk(workspaceId);
   const currency = ws?.currency ?? "USD";
-  const { totals, previousTotals, change, campaigns, findings } = await analyzePeriod(sqlPort, filters);
-  const ctx = buildContext({ from, to, currency, totals, previousTotals, campaigns: campaigns, findings, change });
+  const targets = { roas: Number(ws?.targetRoas ?? 1) };
+  const { totals, previousTotals, change, campaigns, findings } = await analyzePeriod(sqlPort, filters, targets);
+  const ctx = buildContext({ from, to, currency, totals, previousTotals, campaigns: campaigns, findings, change, targetRoas: targets.roas });
 
   const base = {
     generatedAt: new Date().toISOString(), period: { from: from ?? null, to: to ?? null },

@@ -1,7 +1,7 @@
 import { changeMap, type Metrics, type MetricKey } from "../analytics/metrics";
 import { previousPeriod, type Filters } from "../analytics/filters";
 import type { AnalyticsPort, CampaignRow } from "./ask/port";
-import { computeFindings, type Finding } from "./findings";
+import { computeFindings, type Finding, type Targets } from "./findings";
 
 const MAX_CAMPAIGNS = 100;
 
@@ -14,7 +14,7 @@ export interface Analysis {
 }
 
 /** One place that turns raw numbers into findings: used by both the insights panel and "ask your data". */
-export async function analyzePeriod(port: AnalyticsPort, filters: Filters): Promise<Analysis> {
+export async function analyzePeriod(port: AnalyticsPort, filters: Filters, targets: Targets = {}): Promise<Analysis> {
   const { from, to } = filters;
   const list = (f: Filters) => port.listCampaigns(f, { sortBy: "spend", order: "desc", page: 1, pageSize: MAX_CAMPAIGNS });
   const prevFilters = from && to ? { ...filters, ...previousPeriod(from, to) } : undefined;
@@ -26,7 +26,7 @@ export async function analyzePeriod(port: AnalyticsPort, filters: Filters): Prom
   ]);
 
   const findings = computeFindings({
-    totals, previousTotals, campaigns: campaigns.items, weekly, daily,
+    totals, previousTotals, campaigns: campaigns.items, weekly, daily, targets,
     previous: previousList ? new Map(previousList.items.map((c) => [c.id, c as Metrics])) : undefined,
   });
   return {

@@ -17,12 +17,15 @@ export const THRESHOLDS = {
   spendSpikeFactor: 1.5,      // spend at least 1.5x above the usual
   conversionDropFactor: 0.5,  // conversions at least 50% below the usual
   anomalyMinMedianConversions: 3, // at smaller counts a "drop" is just noise
-  maxFindings: 8,
+  noConversionMinClicks: 30,  // zero conversions only means something after enough clicks
+  lowCtrVsWorkspace: 0.5,     // CTR below half of the workspace average
+  lowCtrMinImpressions: 10_000, // a CTR from a few impressions is noise
+  maxFindings: 10,
 } as const;
 
 export type FindingType =
   | "LOSING_MONEY" | "HIGH_CPC" | "CPC_SPIKE" | "ROAS_DROP" | "CONVERSION_DECLINE" | "TOP_PERFORMER"
-  | "SPEND_ANOMALY" | "CONVERSIONS_ANOMALY";
+  | "SPEND_ANOMALY" | "CONVERSIONS_ANOMALY" | "NO_CONVERSIONS" | "LOW_CTR" | "BELOW_TARGET_ROAS";
 export type Severity = "high" | "medium" | "info";
 
 export interface Finding {
@@ -40,6 +43,9 @@ export interface WeeklyRow extends Named { week: string; days: number }
 
 export interface DailyRow extends Named { date: string }
 
+/** Goals the user set for the workspace. A target ROAS of 1 (or none) means "break-even", the original behavior. */
+export interface Targets { roas?: number }
+
 export interface FindingsInput {
   totals: Metrics;
   previousTotals?: Metrics;
@@ -47,6 +53,7 @@ export interface FindingsInput {
   previous?: Map<string, Metrics>;
   weekly: WeeklyRow[];
   daily?: DailyRow[];
+  targets?: Targets;
 }
 
 const median = (xs: number[]) => {
@@ -72,6 +79,7 @@ const SEVERITY_ORDER: Record<Severity, number> = { high: 0, medium: 1, info: 2 }
 
 export function computeFindings(input: FindingsInput): Finding[] {
   const { totals, campaigns, previous, weekly } = input;
+  const targetRoas = input.targets?.roas ?? 1;
   if (totals.spend <= 0) return [];
   const raw: Omit<Finding, "id">[] = [];
   const spendOf = new Map(campaigns.map((c) => [c.id, c.spend]));
@@ -82,9 +90,23 @@ export function computeFindings(input: FindingsInput): Finding[] {
     const base = { campaignId: c.id, campaignName: c.name };
     const sharePct = r2(share * 100);
 
-    if (c.roas !== null && c.roas < THRESHOLDS.losingMoneyRoas) {
+    // Spend without a single conversion is a more specific diagnosis than "ROAS below 1" (it would be reported
+    // as a loss too), so it takes its place instead of being reported twice.
+    const noConversions = c.conversions === 0 && c.clicks >= THRESHOLDS.noConversionMinClicks;
+    if (noConversions) {
+      raw.push({ ...base, type: "NO_CONVERSIONS", severity: "high",
+        evidence: { spend: r2(c.spend), clicks: c.clicks, spendSharePct: sharePct } });
+    } else if (c.roas !== null && c.roas < THRESHOLDS.losingMoneyRoas) {
       raw.push({ ...base, type: "LOSING_MONEY", severity: "high",
         evidence: { roas: r2(c.roas), spend: r2(c.spend), revenue: r2(c.revenue), spendSharePct: sharePct } });
+    } else if (targetRoas > 1 && c.roas !== null && c.roas < targetRoas) {
+      // Profitable, but under the goal the user set: a softer finding than losing money.
+      raw.push({ ...base, type: "BELOW_TARGET_ROAS", severity: "medium",
+        evidence: { roas: r2(c.roas), targetRoas: r2(targetRoas), percentBelowTarget: r2((1 - c.roas / targetRoas) * 100), spendSharePct: sharePct } });
+    }
+    if (c.ctr !== null && totals.ctr !== null && c.impressions >= THRESHOLDS.lowCtrMinImpressions && c.ctr < totals.ctr * THRESHOLDS.lowCtrVsWorkspace) {
+      raw.push({ ...base, type: "LOW_CTR", severity: "medium",
+        evidence: { ctr: r2(c.ctr), workspaceCtr: r2(totals.ctr), percentBelowWorkspace: r2((1 - c.ctr / totals.ctr) * 100), impressions: c.impressions } });
     }
     if (c.cpc !== null && totals.cpc !== null && c.cpc > totals.cpc * THRESHOLDS.highCpcVsWorkspace) {
       raw.push({ ...base, type: "HIGH_CPC", severity: "medium",

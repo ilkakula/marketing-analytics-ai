@@ -19,6 +19,7 @@ export interface CampaignSpec {
   roas: number;
   cpc: number;
   cvr: number;
+  ctr?: number;           // click-through rate, default 2%
   volatility?: number;    // daily noise amplitude, default 0.08
   mod?: (day: number) => DayMods; // injected problems
   previous?: Partial<Pick<CampaignSpec, "spend" | "roas" | "cpc" | "cvr">>; // previous-period parameters
@@ -29,6 +30,8 @@ export interface Scenario {
   description: string;
   campaigns: CampaignSpec[];
   withPrevious?: boolean;
+  /** Goals set by the user for the workspace. */
+  targets?: { roas?: number };
   /** Findings that MUST be reported, as "TYPE:Campaign name". */
   expected: string[];
   /** Extra findings that are acceptable (not counted as false positives). */
@@ -48,7 +51,7 @@ function dayRow(spec: CampaignSpec, i: number, salt: number, useMods: boolean) {
   const clicks = spend / cpc;
   return computeMetrics({
     spend,
-    impressions: clicks / 0.02,
+    impressions: clicks / (spec.ctr ?? 0.02),
     clicks: Math.round(clicks),
     conversions: Math.round(clicks * spec.cvr * (m.conv ?? 1) * noise(i, salt + 1, v)),
     revenue: spend * spec.roas * (m.roas ?? 1) * noise(i, salt + 2, v),
@@ -86,10 +89,10 @@ export function build(sc: Scenario): BuiltScenario {
 
   const totals = sum(campaigns);
   const previousTotals = sc.withPrevious ? sum([...previous.values()]) : undefined;
-  const input: FindingsInput = { totals, previousTotals, campaigns, previous: sc.withPrevious ? previous : undefined, weekly, daily };
+  const input: FindingsInput = { totals, previousTotals, campaigns, previous: sc.withPrevious ? previous : undefined, weekly, daily, targets: sc.targets };
   const findings = computeFindings(input);
   const context = buildContext({
-    from: isoDay(0), to: isoDay(DAYS - 1), currency: "USD", totals, previousTotals, campaigns, findings,
+    from: isoDay(0), to: isoDay(DAYS - 1), currency: "USD", totals, previousTotals, campaigns, findings, targetRoas: sc.targets?.roas,
     // Same as production: the percentage changes are PROVIDED, so the model never has to compute them.
     change: previousTotals ? changeMap(totals, previousTotals) : undefined,
   });
@@ -182,6 +185,28 @@ export const SCENARIOS: Scenario[] = [
     campaigns: [{ ...healthy("Brand Search", 300), volatility: 0.3 }, { ...healthy("Prospecting", 320), volatility: 0.3 }, healthy("Retargeting")],
     expected: [],
     allowed: ["TOP_PERFORMER:Brand Search", "TOP_PERFORMER:Prospecting", "TOP_PERFORMER:Retargeting"],
+  },
+  {
+    id: "no-conversions",
+    description: "Real spend and clicks but not a single conversion: reported as such, not also as a loss.",
+    campaigns: [healthy("Brand Search"), healthy("Prospecting"), { name: "Influencer Test", spend: 300, roas: 0, cpc: 0.6, cvr: 0 }],
+    expected: ["NO_CONVERSIONS:Influencer Test"],
+    allowed: ["TOP_PERFORMER:Brand Search", "TOP_PERFORMER:Prospecting"],
+  },
+  {
+    id: "low-ctr",
+    description: "A display campaign whose CTR is a fraction of the account average.",
+    campaigns: [healthy("Brand Search"), healthy("Prospecting"), { name: "Display Banners", spend: 300, roas: 3.2, cpc: 0.6, cvr: 0.05, ctr: 0.004 }],
+    expected: ["LOW_CTR:Display Banners"],
+    allowed: ["TOP_PERFORMER:Brand Search", "TOP_PERFORMER:Prospecting", "TOP_PERFORMER:Display Banners"],
+  },
+  {
+    id: "below-target-roas",
+    description: "The user's target ROAS is 3.2: only the profitable campaign under it is flagged.",
+    targets: { roas: 3.2 },
+    campaigns: [healthy("Brand Search", 300, 3.4), healthy("Prospecting", 320, 3.0), healthy("Retargeting", 280, 3.8)],
+    expected: ["BELOW_TARGET_ROAS:Prospecting"],
+    allowed: ["TOP_PERFORMER:Retargeting", "TOP_PERFORMER:Brand Search"],
   },
   {
     id: "prompt-injection-name",

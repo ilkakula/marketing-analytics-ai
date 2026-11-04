@@ -10,6 +10,8 @@ import { type AdMetric, toExternalId } from "../modules/imports/adMetric";
 //  - "New Collection": conversions keep falling
 //  - "Prospecting - Lookalike": spend x3.2 two days ago (runaway budget)
 //  - "Brand Search": today conversions ~0 with normal spend (broken tracking)
+//  - "Influencer Test": real spend and clicks, no conversions at all
+//  - "Display - Banners": CTR far below the account average
 // Deterministic (same seed = same data), so demos and tests are repeatable.
 const DAYS = 90;
 const EMAIL = "demo@spendlens.dev";
@@ -32,6 +34,8 @@ const PROFILES: Profile[] = [
   { name: "Summer Sale - Broad", dailySpend: 620, cpm: 8, ctr: 0.011, cvr: 0.012, aov: 48 },
   { name: "Video Views - Awareness", dailySpend: 260, cpm: 5, ctr: 0.012, cvr: 0.01, aov: 55,
     tweak: (d, v) => { if (d >= DAYS - 14) { v.ctr *= 0.55; v.cpm *= 1.15; } } }, // CPC ≈ cpm/(1000*ctr) grows
+  { name: "Influencer Test", dailySpend: 140, cpm: 12, ctr: 0.012, cvr: 0, aov: 0 },
+  { name: "Display - Banners", dailySpend: 150, cpm: 3, ctr: 0.0012, cvr: 0.08, aov: 100 },
   { name: "New Collection", dailySpend: 300, cpm: 10, ctr: 0.018, cvr: 0.03, aov: 75,
     tweak: (d, v) => { if (d >= DAYS - 28) v.cvr *= 1 - ((d - (DAYS - 28)) / 28) * 0.6; } }, // drops by up to 60%
 ];

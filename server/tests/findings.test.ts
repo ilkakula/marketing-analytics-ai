@@ -133,3 +133,58 @@ describe("anomalies (last 3 days versus the baseline)", () => {
     expect(run(d).some((x) => x.type === "CONVERSIONS_ANOMALY")).toBe(false);
   });
 });
+
+// ---------- Spend without conversions, low CTR and a target ROAS ----------
+describe("NO_CONVERSIONS", () => {
+  const totals2 = m(1000, 100000, 1500, 100, 2500);
+  const ok = camp("a", "Alpha", m(600, 60000, 1000, 100, 2500));
+  it("reports spend and clicks without any conversion, instead of a plain loss", () => {
+    const dead = camp("d", "Influencer", m(300, 30000, 400, 0, 0));
+    const f = computeFindings({ totals: totals2, campaigns: [ok, dead], weekly: [] });
+    expect(f.filter((x) => x.campaignName === "Influencer").map((x) => x.type)).toEqual(["NO_CONVERSIONS"]); // not LOSING_MONEY as well
+    expect(f.find((x) => x.type === "NO_CONVERSIONS")).toMatchObject({ severity: "high", evidence: { spend: 300, clicks: 400, spendSharePct: 30 } });
+  });
+  it("needs enough clicks and a meaningful share of the budget", () => {
+    const fewClicks = camp("d", "Influencer", m(300, 3000, 20, 0, 0));      // 20 clicks: too early to say
+    expect(computeFindings({ totals: totals2, campaigns: [ok, fewClicks], weekly: [] }).some((x) => x.type === "NO_CONVERSIONS")).toBe(false);
+    const tiny = camp("t", "Tiny", m(20, 3000, 100, 0, 0));                  // 2% of the budget
+    expect(computeFindings({ totals: totals2, campaigns: [ok, tiny], weekly: [] }).some((x) => x.type === "NO_CONVERSIONS")).toBe(false);
+  });
+});
+
+describe("LOW_CTR", () => {
+  const camps = [camp("a", "Alpha", m(500, 50000, 1500, 60, 2000)), camp("b", "Banner", m(500, 100000, 300, 10, 500))];
+  const totals3 = m(1000, 150000, 1800, 70, 2500); // account CTR 1.2%
+  it("flags a CTR far below the account average", () => {
+    const f = computeFindings({ totals: totals3, campaigns: camps, weekly: [] }).find((x) => x.type === "LOW_CTR")!;
+    expect(f).toMatchObject({ campaignName: "Banner", severity: "medium" });
+    expect(f.evidence).toMatchObject({ ctr: 0.3, workspaceCtr: 1.2, percentBelowWorkspace: 75, impressions: 100000 });
+  });
+  it("ignores small impression counts", () => {
+    const small = [camps[0]!, camp("b", "Banner", m(500, 5000, 5, 1, 50))];
+    expect(computeFindings({ totals: totals3, campaigns: small, weekly: [] }).some((x) => x.type === "LOW_CTR")).toBe(false);
+  });
+});
+
+describe("BELOW_TARGET_ROAS", () => {
+  const good = camp("g", "Good", m(500, 50000, 1000, 50, 2000));  // ROAS 4
+  const mid = camp("m", "Middling", m(400, 40000, 800, 40, 1000)); // ROAS 2.5
+  const bad = camp("b", "Bad", m(100, 10000, 200, 5, 50));        // ROAS 0.5
+  const totals4 = m(1000, 100000, 2000, 95, 3050);
+  const run = (roas?: number) => computeFindings({ totals: totals4, campaigns: [good, mid, bad], weekly: [], targets: roas === undefined ? undefined : { roas } });
+  const kinds = (f: ReturnType<typeof run>) => f.map((x) => `${x.type}:${x.campaignName}`);
+
+  it("flags profitable campaigns that are under the user's target", () => {
+    expect(kinds(run(3))).toContain("BELOW_TARGET_ROAS:Middling");
+    expect(run(3).find((x) => x.type === "BELOW_TARGET_ROAS")!.evidence).toMatchObject({ roas: 2.5, targetRoas: 3, percentBelowTarget: 16.67 });
+  });
+  it("never reports a loser twice, and never flags a campaign that meets the target", () => {
+    const k = kinds(run(3));
+    expect(k).not.toContain("BELOW_TARGET_ROAS:Bad"); // already LOSING_MONEY (ROAS below 1)
+    expect(k).not.toContain("BELOW_TARGET_ROAS:Good"); // 4 >= 3
+  });
+  it("a target of 1 or none keeps the original behavior", () => {
+    expect(kinds(run(1)).some((x) => x.startsWith("BELOW_TARGET_ROAS"))).toBe(false);
+    expect(kinds(run()).some((x) => x.startsWith("BELOW_TARGET_ROAS"))).toBe(false);
+  });
+});

@@ -67,8 +67,8 @@ export const openapi = {
       responses: { "200": { description: "answer, source (llm|data), verified (every number found in the tool results), steps (tools called), notice (NO_API_KEY|RATE_LIMITED|LLM_UNAVAILABLE|LLM_REJECTED|NO_DATA)" }, "400": errorResponse, "401": errorResponse } } },
     "/api/workspaces/current": { get: { summary: "Current workspace", security: [{ bearer: [] }],
       responses: { "200": { description: "OK" }, "401": errorResponse, "403": errorResponse } },
-      patch: { summary: "Update the workspace name and display currency", security: [{ bearer: [] }],
-        requestBody: { required: true, content: { "application/json": { schema: { type: "object", properties: { name: { type: "string", maxLength: 120 }, currency: { type: "string", description: "ISO 4217 code, e.g. EUR" } } } } } },
+      patch: { summary: "Update the workspace name, display currency and target ROAS", security: [{ bearer: [] }],
+        requestBody: { required: true, content: { "application/json": { schema: { type: "object", properties: { name: { type: "string", maxLength: 120 }, currency: { type: "string", description: "ISO 4217 code, e.g. EUR" }, targetRoas: { type: "number", minimum: 1, maximum: 100, description: "The ROAS the user aims for; 1 = break-even" } } } } } },
         responses: { "200": { description: "OK" }, "400": errorResponse, "401": errorResponse } } },
   },
 };

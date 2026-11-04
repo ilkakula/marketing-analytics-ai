@@ -52,6 +52,24 @@ export function describe(f: Finding, cur: string): Described {
         action: `Check conversion tracking and the status of campaign ${name} for ${f.date}`,
         reason: `The campaign kept spending (${m(e.spend!)}) while conversions fell from a usual ${n(e.baselineConversions!)} to ${n(e.conversions!)}. A tracking issue is possible, but the data does not confirm it.`,
       };
+    case "NO_CONVERSIONS":
+      return {
+        message: `Campaign ${name} spent ${m(e.spend!)} (${n(e.spendSharePct!)}% of the budget) and received ${n(e.clicks!)} clicks, but recorded no conversions.`,
+        action: `Check conversion tracking and the landing page of campaign ${name}`,
+        reason: `${n(e.clicks!)} clicks and ${m(e.spend!)} of spend produced no conversions. Broken tracking and a poorly converting offer look the same in this data.`,
+      };
+    case "LOW_CTR":
+      return {
+        message: `CTR of campaign ${name} is ${n(e.ctr!)}%, ${n(e.percentBelowWorkspace!)}% below the workspace average (${n(e.workspaceCtr!)}%) across ${n(e.impressions!)} impressions.`,
+        action: `Review the creatives and targeting of campaign ${name}`,
+        reason: `Few people click (${n(e.ctr!)}% against an average of ${n(e.workspaceCtr!)}%). The data shows the gap, not whether the creative or the audience is the reason.`,
+      };
+    case "BELOW_TARGET_ROAS":
+      return {
+        message: `Campaign ${name} has a ROAS of ${n(e.roas!)}, ${n(e.percentBelowTarget!)}% below your target of ${n(e.targetRoas!)}, while taking ${n(e.spendSharePct!)}% of the budget.`,
+        action: `Look for ways to lift the ROAS of campaign ${name} toward the target`,
+        reason: `The campaign is profitable (ROAS ${n(e.roas!)}) but under your target of ${n(e.targetRoas!)}.`,
+      };
     case "TOP_PERFORMER":
       return {
         message: `Campaign ${name} has the best ROAS (${n(e.roas!)}), ${n(e.roasVsWorkspace!)}x the workspace average (${n(e.workspaceRoas!)}).`,

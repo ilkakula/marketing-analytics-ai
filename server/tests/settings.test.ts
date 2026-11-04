@@ -49,3 +49,23 @@ describe("PATCH /api/workspaces/current", () => {
     expect((await request(app).patch("/api/workspaces/current").send({ currency: "EUR" })).status).toBe(401);
   });
 });
+
+describe("target ROAS setting", () => {
+  it("defaults to 1 (break-even), can be changed, and is returned as a number", async () => {
+    expect((await current()).body.targetRoas).toBe(1);
+    const res = await patch({ targetRoas: 3.5 });
+    expect(res.status).toBe(200);
+    expect(res.body.targetRoas).toBe(3.5);
+    expect((await current()).body.targetRoas).toBe(3.5);
+  });
+  it("rejects values below break-even, above 100 and non-numbers", async () => {
+    expect((await patch({ targetRoas: 0.5 })).status).toBe(400);
+    expect((await patch({ targetRoas: 101 })).status).toBe(400);
+    expect((await patch({ targetRoas: "3" })).status).toBe(400);
+  });
+  it("isolation: the target of one workspace does not affect another", async () => {
+    const other = await registerUser(app, "b@x.com", "Other");
+    await patch({ targetRoas: 6 });
+    expect((await current(other.token)).body.targetRoas).toBe(1);
+  });
+});

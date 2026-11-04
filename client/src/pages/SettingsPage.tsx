@@ -28,20 +28,25 @@ export function SettingsPage() {
   // `null` means "not edited yet": the form follows the server value until the user types.
   const [name, setName] = useState<string | null>(null);
   const [currency, setCurrency] = useState<string | null>(null);
+  const [target, setTarget] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
   const save = useMutation({
-    mutationFn: (body: { name: string; currency: string }) => api<Workspace>("/api/workspaces/current", { method: "PATCH", json: body }),
+    mutationFn: (body: { name: string; currency: string; targetRoas: number }) => api<Workspace>("/api/workspaces/current", { method: "PATCH", json: body }),
     onSuccess: (updated) => {
       qc.setQueryData(["workspace"], updated); // every amount in the app re-formats with the new currency
-      setName(null); setCurrency(null); setSaved(true);
+      for (const k of ["summary"]) qc.invalidateQueries({ queryKey: [k] });
+      setName(null); setCurrency(null); setTarget(null); setSaved(true);
     },
   });
 
   const nameValue = name ?? ws?.name ?? "";
   const currencyValue = currency ?? ws?.currency ?? "USD";
-  const dirty = !!ws && (nameValue.trim() !== ws.name || currencyValue !== ws.currency);
-  const submit = (e: FormEvent) => { e.preventDefault(); setSaved(false); save.mutate({ name: nameValue.trim(), currency: currencyValue }); };
+  const targetValue = target ?? String(ws?.targetRoas ?? 1);
+  const targetNumber = Number(targetValue);
+  const targetValid = Number.isFinite(targetNumber) && targetNumber >= 1 && targetNumber <= 100;
+  const dirty = !!ws && targetValid && (nameValue.trim() !== ws.name || currencyValue !== ws.currency || targetNumber !== ws.targetRoas);
+  const submit = (e: FormEvent) => { e.preventDefault(); setSaved(false); save.mutate({ name: nameValue.trim(), currency: currencyValue, targetRoas: targetNumber }); };
 
   return (
     <>
@@ -60,6 +65,15 @@ export function SettingsPage() {
               </Select>
             </Field>
             <p className="text-xs text-ink-2">The currency only changes how amounts are displayed. Imported values are not converted.</p>
+            <Field label="Target ROAS">
+              <Input type="number" inputMode="decimal" min={1} max={100} step="0.1" value={targetValue}
+                aria-invalid={!targetValid} onChange={(e) => { setTarget(e.target.value); setSaved(false); }} />
+            </Field>
+            <p className="text-xs text-ink-2">
+              The return you are aiming for. Campaigns below 1 are always reported as losing money; campaigns that are profitable but
+              below this target are reported as below target. 1 means break-even only.
+              {!targetValid && <span role="alert" className="ml-1 text-bad">Enter a number from 1 to 100.</span>}
+            </p>
             {save.error != null && <ErrorBox error={save.error} />}
             <div className="flex items-center gap-3">
               <Button type="submit" variant="brand" disabled={!dirty || save.isPending}>{save.isPending ? "Saving…" : "Save changes"}</Button>

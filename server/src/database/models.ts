@@ -24,6 +24,7 @@ export class Workspace extends Model<InferAttributes<Workspace>, InferCreationAt
   declare name: string;
   declare currency: CreationOptional<string>;
   declare timezone: CreationOptional<string>;
+  declare targetRoas: CreationOptional<number | string>; // DECIMAL comes back as a string from pg
 }
 Workspace.init(
   {
@@ -31,6 +32,7 @@ Workspace.init(
     name: { type: DataTypes.STRING(120), allowNull: false },
     currency: { type: DataTypes.STRING(3), allowNull: false, defaultValue: "USD" },
     timezone: { type: DataTypes.STRING(64), allowNull: false, defaultValue: "UTC" },
+    targetRoas: { type: DataTypes.DECIMAL(6, 2), allowNull: false, defaultValue: 1 },
   },
   { sequelize, tableName: "workspaces" },
 );

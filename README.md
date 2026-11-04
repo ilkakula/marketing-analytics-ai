@@ -14,7 +14,7 @@ plain-language findings and recommendations in which every number is checked aga
 | **Campaigns** | Search, sort by any metric, per-campaign details (ad sets and ads), side-by-side comparison of up to four campaigns, CSV export protected against formula injection. |
 | **AI insights** | A deterministic rules engine finds the problems (campaign losing money, CPC spike, conversion decline, runaway budget, broken tracking). An LLM explains them. |
 | **Ask your data** | Plain-English questions answered through function calling over a few read-only, workspace-scoped tools. |
-| **Multi-tenant** | Every workspace is isolated; each route is covered by isolation tests. Workspace settings (name, currency). |
+| **Multi-tenant** | Every workspace is isolated; each route is covered by isolation tests. Workspace settings (name, currency, target ROAS). |
 
 | AI insights | Ask your data |
 |---|---|
@@ -29,6 +29,21 @@ The model never discovers problems and never sees the database.
 4. **If verification fails, or the model is unavailable, rate-limited or not configured, the rule-based findings are shown instead.** The user is never shown an invented figure.
 5. **"Ask your data" uses tools, not SQL.** The workspace comes from the verified token and is not a tool argument; arguments are validated; the final answer goes through the same verification.
 
+## Problems it detects
+Every rule is deterministic with named thresholds (`server/src/modules/ai/findings.ts`) and only reports campaigns that take at least 5% of the spend.
+
+| Finding | Fires when |
+|---|---|
+| Losing money | ROAS below 1 |
+| Spend without conversions | 30+ clicks and not a single conversion (replaces "losing money" for that campaign) |
+| Below target ROAS | profitable, but under the **target ROAS the user set** in Settings (1 = break-even only) |
+| High CPC / CPC spike | CPC 30% above the account average / 30% up versus the previous period |
+| Low CTR | CTR below half of the account average (10,000+ impressions) |
+| ROAS drop | ROAS 25% down versus the previous period |
+| Conversion decline | three complete weeks in a row, 20% or more in total |
+| Spend anomaly / conversions anomaly | one of the last 3 days far from the previous 14 days (runaway budget / possible broken tracking) |
+| Top performer | ROAS 1.5x above the account average (an opportunity) |
+
 ## Evaluation
 The AI layer is measured, not assumed (`server/evals`): synthetic accounts with known correct answers, a labeled corpus of defective model answers for the validator, an LLM judge calibrated on deliberately bad answers, model comparison and an evaluation of the tool-using flow. Each metric has a pass/fail gate and the commands exit non-zero on failure, so they fit in CI.
 
@@ -38,7 +53,7 @@ npm run eval:llm -- --judge    # real model: grounded numbers, injection resista
 npm run eval:compare -- --models gemini-3.5-flash-lite,gemini-3.1-flash-lite
 npm run eval:ask               # tool choice, answer correctness, refusals
 ```
-Measured so far (synthetic data, `gemini-3.5-flash-lite`): rule findings 100% precision and 100% recall on 13 scenarios; the validator catches 13 of 13 defective answers with no false rejects; the quality judge ranks a solid answer 5/5 against 1 to 2.2 for deliberately bad ones; the model's answers had 100% grounded numbers and 100% resistance to prompt injection; "Ask your data" chose the right tools for 14 of 14 questions, with every answer verified and every off-topic or prompt-leak request refused. The model comparison is still to be run (the free daily quota of the larger models was used up).
+Measured so far (synthetic data, `gemini-3.5-flash-lite`): rule findings 100% precision and 100% recall on 16 labeled scenarios; the validator catches 13 of 13 defective answers with no false rejects; the quality judge ranks a solid answer 5/5 against 1 to 2.2 for deliberately bad ones; the model's answers had 100% grounded numbers and 100% resistance to prompt injection; "Ask your data" chose the right tools for 14 of 14 questions, with every answer verified and every off-topic or prompt-leak request refused. The model comparison is still to be run (the free daily quota of the larger models was used up).
 
 The free Gemini tier allows 15 requests per minute per model and 20 per day for the larger Flash models, so the evaluation paces its calls.
 

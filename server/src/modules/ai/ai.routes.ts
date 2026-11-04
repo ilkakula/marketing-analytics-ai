@@ -29,5 +29,5 @@ aiRouter.post("/ask", async (req, res) => {
   const input = askSchema.parse(req.body ?? {});
   const workspaceId = req.auth!.workspaceId;
   const ws = await Workspace.findByPk(workspaceId);
-  res.json(await askQuestion({ port: sqlPort, provider: getProvider() }, { workspaceId, currency: ws?.currency ?? "USD", ...input }));
+  res.json(await askQuestion({ port: sqlPort, provider: getProvider() }, { workspaceId, currency: ws?.currency ?? "USD", targetRoas: Number(ws?.targetRoas ?? 1), ...input }));
 });

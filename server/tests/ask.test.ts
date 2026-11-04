@@ -196,9 +196,9 @@ describe("POST /api/ai/ask", () => {
 });
 
 describe("tools", () => {
-  const ctx = async (defaults: { from?: string; to?: string } = {}) => {
+  const ctx = async (defaults: { from?: string; to?: string } = {}, targetRoas?: number) => {
     const ws = await Workspace.findOne();
-    return { port: sqlPort, workspaceId: ws!.id, currency: "USD", defaults };
+    return { port: sqlPort, workspaceId: ws!.id, currency: "USD", targetRoas, defaults };
   };
 
   it("get_summary compares with the previous period and returns provided percentage changes", async () => {
@@ -216,6 +216,11 @@ describe("tools", () => {
   it("get_findings returns the rule-based findings with evidence", async () => {
     const { result } = await runTool("get_findings", {}, await ctx());
     expect((result as any).findings[0]).toMatchObject({ type: "LOSING_MONEY", campaign: "Losing Money", severity: "high" });
+  });
+
+  it("get_findings applies the workspace's target ROAS", async () => {
+    const { result } = await runTool("get_findings", {}, await ctx({}, 5));
+    expect((result as any).findings.map((f: { type: string; campaign: string }) => `${f.type}:${f.campaign}`)).toContain("BELOW_TARGET_ROAS:Good One");
   });
 
   it("get_trend returns weekly or daily points for selected metrics only", async () => {

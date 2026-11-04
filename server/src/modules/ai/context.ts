@@ -4,6 +4,7 @@ import type { Finding } from "./findings";
 export interface AiContext {
   period: { from: string | null; to: string | null; days: number | null };
   currency: string;
+  targetRoas?: number;
   totals: Metrics;
   previousTotals?: Metrics;
   changePercent?: Record<MetricKey, number | null>;
@@ -14,12 +15,13 @@ export interface AiContext {
 export function buildContext(args: {
   from?: string; to?: string; currency: string; totals: Metrics; previousTotals?: Metrics;
   change?: Record<MetricKey, number | null>;
-  campaigns: Array<Metrics & { name: string }>; findings: Finding[];
+  campaigns: Array<Metrics & { name: string }>; findings: Finding[]; targetRoas?: number;
 }): AiContext {
   const days = args.from && args.to ? Math.round((Date.parse(args.to) - Date.parse(args.from)) / 86_400_000) + 1 : null;
   return {
     period: { from: args.from ?? null, to: args.to ?? null, days },
     currency: args.currency,
+    ...(args.targetRoas && args.targetRoas > 1 ? { targetRoas: args.targetRoas } : {}),
     totals: args.totals,
     ...(args.previousTotals ? { previousTotals: args.previousTotals } : {}),
     ...(args.change ? { changePercent: args.change } : {}),

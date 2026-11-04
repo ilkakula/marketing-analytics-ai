@@ -122,6 +122,15 @@ describe("POST /api/ai/insights", () => {
     expect(p.prompts).toHaveLength(0);
   });
 
+  it("uses the workspace's target ROAS: profitable campaigns under it are flagged and the model knows the target", async () => {
+    const p = fakeProvider(() => VALID);
+    setProviderForTests(p);
+    await request(app).patch("/api/workspaces/current").set("Authorization", `Bearer ${token}`).send({ targetRoas: 5 });
+    const res = await insights();
+    expect(res.body.findings.map((f: { type: string; campaignName: string }) => `${f.type}:${f.campaignName}`)).toEqual(expect.arrayContaining(["LOSING_MONEY:Losing Money", "BELOW_TARGET_ROAS:Good One"]));
+    expect(p.prompts[0]).toContain('"targetRoas":5');
+  });
+
   it("validates input and requires authentication", async () => {
     expect((await insights({ from: "bad" })).status).toBe(400);
     expect((await insights({ from: "2026-10-05", to: "2026-10-01" })).status).toBe(400);
