@@ -1,0 +1,21 @@
+{
+  "name": "spendlens",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev -w server",
+    "test": "npm test -w server",
+    "db:up": "docker compose up -d postgres",
+    "db:migrate": "npm run migrate -w server",
+    "dev:client": "npm run dev -w client",
+    "db:seed": "npm run seed -w server",
+    "eval": "npm run eval -w server",
+    "eval:llm": "npm run eval:llm -w server",
+    "eval:compare": "npm run eval:compare -w server --",
+    "eval:ask": "npm run eval:ask -w server --"
+  },
+  "description": "Marketing analytics platform with verified AI insights"
+}

@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+coverage
+.DS_Store
+.env.*
+!.env.example
+*.log
+server/evals/reports/
+demo/*.mp4
