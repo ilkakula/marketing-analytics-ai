@@ -1,0 +1,141 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+/* Design tokens. Components use roles (not raw colors): the two themes only swap these variables.
+   Series colors are validated with a script (CVD and contrast) against both surfaces. */
+:root {
+  color-scheme: light;
+  --page: #f4f5f8;
+  --surface: #ffffff;
+  --surface-2: #f8f9fb;
+  --surface-3: #eef0f4;
+  --ink: #0b0c10;
+  --ink-2: #484e5c;
+  --muted: #6a7080;
+  --line: rgba(14, 17, 24, 0.09);
+  --line-strong: rgba(14, 17, 24, 0.18);
+  --grid: rgba(14, 17, 24, 0.07);
+  --axis: rgba(14, 17, 24, 0.2);
+  --accent: #4f5bf0;
+  --accent-ink: #ffffff;
+  --accent-text: #3f4ad6;
+  --accent-soft: rgba(79, 91, 240, 0.1);
+  --glow: rgba(99, 102, 241, 0.16);
+  --brand: linear-gradient(135deg, #6d7cff 0%, #a78bfa 52%, #38bdf8 100%);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --good: #046c1c;
+  --good-soft: rgba(4, 108, 28, 0.1);
+  --bad: #b42318;
+  --bad-soft: rgba(180, 35, 24, 0.1);
+  --warn: #8a5300;
+  --warn-soft: rgba(138, 83, 0, 0.12);
+  --shadow: 0 1px 2px rgba(14, 17, 24, 0.05), 0 8px 24px -12px rgba(14, 17, 24, 0.12);
+  --shadow-lg: 0 2px 4px rgba(14, 17, 24, 0.06), 0 24px 48px -20px rgba(14, 17, 24, 0.28);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #08090c;
+  --surface: #0f1115;
+  --surface-2: #14171c;
+  --surface-3: #1b1f26;
+  --ink: #f5f6f8;
+  --ink-2: #b6bbc7;
+  --muted: #8b91a0;
+  --line: rgba(255, 255, 255, 0.075);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --grid: rgba(255, 255, 255, 0.06);
+  --axis: rgba(255, 255, 255, 0.16);
+  --accent: #5b67f5;
+  --accent-ink: #ffffff;
+  --accent-text: #9aa3ff;
+  --accent-soft: rgba(124, 131, 255, 0.14);
+  --glow: rgba(99, 102, 241, 0.22);
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --good: #3ddc84;
+  --good-soft: rgba(61, 220, 132, 0.12);
+  --bad: #ff7a70;
+  --bad-soft: rgba(255, 122, 112, 0.13);
+  --warn: #ffc247;
+  --warn-soft: rgba(255, 194, 71, 0.13);
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 12px 32px -16px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 32px 64px -24px rgba(0, 0, 0, 0.85);
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-text: var(--accent-text);
+  --color-accent-soft: var(--accent-soft);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
+  --color-series-4: var(--series-4);
+  --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --shadow-card: var(--shadow);
+  --shadow-pop: var(--shadow-lg);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss03";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--accent-soft); }
+* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+
+/* ---------- motion ---------- */
+@keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+@keyframes glow-drift { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(3%, -4%, 0) scale(1.08); } }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+
+.animate-fade-up { animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.skeleton { position: relative; overflow: hidden; background: var(--surface-3); border-radius: 0.5rem; }
+.skeleton::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--ink) 7%, transparent), transparent);
+  animation: shimmer 1.4s infinite;
+}
+.stagger > * { animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.stagger > *:nth-child(2) { animation-delay: 0.04s; } .stagger > *:nth-child(3) { animation-delay: 0.08s; }
+.stagger > *:nth-child(4) { animation-delay: 0.12s; } .stagger > *:nth-child(5) { animation-delay: 0.16s; }
+.stagger > *:nth-child(6) { animation-delay: 0.2s; } .stagger > *:nth-child(7) { animation-delay: 0.24s; }
+.stagger > *:nth-child(8) { animation-delay: 0.28s; }
+
+/* gradient border: a 1px wrapper with the brand gradient and an inner surface */
+.brand-border { background: var(--brand); padding: 1px; border-radius: 1.1rem; }
+.brand-text { background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.dot-grid {
+  background-image: radial-gradient(var(--line-strong) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse at 50% 0%, black 0%, transparent 70%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
