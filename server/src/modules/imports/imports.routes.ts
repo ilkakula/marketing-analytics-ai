@@ -4,7 +4,7 @@ import { z } from "zod";
 import { requireAuth } from "../../middleware/auth";
 import { badRequest, notFound } from "../../shared/errors";
 import { mappingSchema } from "./csv.adapter";
-import { getImport, importCsv } from "./imports.service";
+import { getImport, importCsv, listImports, undoImport } from "./imports.service";
 
 export const MAX_FILE_BYTES = 5 * 1024 * 1024;
 // Memory storage is fine with a 5 MB limit; for larger files we would switch to streaming/disk.
@@ -30,6 +30,16 @@ importsRouter.post("/csv", upload.single("file"), async (req, res) => {
     filename: file.originalname, buffer: file.buffer, mapping,
   });
   res.status(job.status === "failed" ? 422 : 201).json(job);
+});
+
+importsRouter.get("/", async (req, res) => {
+  res.json({ items: await listImports(req.auth!.workspaceId) });
+});
+
+importsRouter.delete("/:id", async (req, res) => {
+  const id = z.uuid().safeParse(req.params.id);
+  if (!id.success) throw notFound("Import not found");
+  res.json(await undoImport(req.auth!.workspaceId, id.data));
 });
 
 importsRouter.get("/:id", async (req, res) => {

@@ -2,7 +2,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { makeFmt } from "@/lib/format";
 import { useRange } from "@/lib/dateRange";
-import type { CampaignDetail, CampaignList, Point, Summary, Workspace } from "@/lib/types";
+import type { CampaignDetail, CampaignList, ImportHistoryItem, Point, Summary, Workspace } from "@/lib/types";
 import { useMemo } from "react";
 
 export function useWorkspace() {
@@ -46,4 +46,8 @@ export function useCampaign(id: string) {
     queryFn: () => api<CampaignDetail>(`/api/campaigns/${id}`, { query: { from: range.from, to: range.to } }),
     placeholderData: keepPreviousData,
   });
+}
+
+export function useImports() {
+  return useQuery({ queryKey: ["imports"], queryFn: () => api<{ items: ImportHistoryItem[] }>("/api/imports") });
 }

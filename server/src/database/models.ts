@@ -147,6 +147,7 @@ export class DailyMetric extends Model<InferAttributes<DailyMetric>, InferCreati
   declare clicks: number;
   declare conversions: number;
   declare revenue: number | string;
+  declare importJobId: CreationOptional<string | null>; // the import that wrote this row last
 }
 DailyMetric.init(
   {
@@ -159,11 +160,12 @@ DailyMetric.init(
     clicks: { type: DataTypes.INTEGER, allowNull: false },
     conversions: { type: DataTypes.INTEGER, allowNull: false },
     revenue: { type: DataTypes.DECIMAL(14, 2), allowNull: false },
+    importJobId: { type: DataTypes.UUID, allowNull: true },
   },
   { sequelize, tableName: "daily_metrics" },
 );
 
-export type ImportStatus = "processing" | "completed" | "completed_with_errors" | "failed";
+export type ImportStatus = "processing" | "completed" | "completed_with_errors" | "failed" | "undone";
 export interface ImportRowError { row: number; column?: string; message: string }
 
 export class ImportJob extends Model<InferAttributes<ImportJob>, InferCreationAttributes<ImportJob>> {

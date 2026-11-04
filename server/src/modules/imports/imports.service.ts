@@ -3,7 +3,8 @@ import { sequelize } from "../../database/sequelize";
 import {
   Ad, AdSet, Campaign, DailyMetric, DataSource, ImportJob, type ImportRowError, type ImportStatus,
 } from "../../database/models";
-import { notFound } from "../../shared/errors";
+import { AppError, notFound } from "../../shared/errors";
+import { QueryTypes } from "sequelize";
 import { type ColumnMapping, parseCsv } from "./csv.adapter";
 import type { AdMetric } from "./adMetric";
 
@@ -23,7 +24,7 @@ async function chunkedUpsert<M extends Model>(
 }
 
 // Every row is already normalized (AdMetric); here we persist it with no knowledge of CSV.
-export async function persistMetrics(workspaceId: string, metrics: AdMetric[], t: Transaction) {
+export async function persistMetrics(workspaceId: string, metrics: AdMetric[], t: Transaction, importJobId: string | null = null) {
   const [source] = await DataSource.findOrCreate({
     where: { workspaceId, provider: "csv" }, defaults: { workspaceId, provider: "csv", name: "CSV upload" }, transaction: t,
   });
@@ -62,12 +63,12 @@ export async function persistMetrics(workspaceId: string, metrics: AdMetric[], t
     const sid = adSetId.get(`${campaignId.get(m.campaignExternalId)}|${m.adSetExternalId}`)!;
     return {
       workspaceId, adId: adId.get(`${sid}|${m.adExternalId}`)!, date: m.date, spend: m.spend,
-      impressions: m.impressions, clicks: m.clicks, conversions: m.conversions, revenue: m.revenue,
+      impressions: m.impressions, clicks: m.clicks, conversions: m.conversions, revenue: m.revenue, importJobId,
     };
   });
   // Re-uploading the same file OVERWRITES values (idempotent), it never duplicates.
   await chunkedUpsert(DailyMetric, metricRows, ["adId", "date"],
-    ["spend", "impressions", "clicks", "conversions", "revenue"], t);
+    ["spend", "impressions", "clicks", "conversions", "revenue", "importJobId"], t);
 }
 
 export async function importCsv(args: {
@@ -85,7 +86,7 @@ export async function importCsv(args: {
   try {
     if (parsed.metrics.length > 0) {
       // All or nothing for the VALID rows: if the write fails midway, no half-finished import remains.
-      await sequelize.transaction((t) => persistMetrics(args.workspaceId, parsed.metrics, t));
+      await sequelize.transaction((t) => persistMetrics(args.workspaceId, parsed.metrics, t, job.id));
     }
     const status: ImportStatus = parsed.metrics.length === 0 ? "failed"
       : parsed.errors.length ? "completed_with_errors" : "completed";
@@ -103,6 +104,38 @@ export async function getImport(workspaceId: string, id: string) {
   const job = await ImportJob.findOne({ where: { id, workspaceId } });
   if (!job) throw notFound("Import not found");
   return serializeJob(job);
+}
+
+/** Recent imports of the workspace, newest first, with how many rows each one still owns. */
+export async function listImports(workspaceId: string, limit = 20) {
+  const jobs = await ImportJob.findAll({ where: { workspaceId }, order: [["createdAt", "DESC"]], limit });
+  const owned = jobs.length === 0 ? [] : await sequelize.query<{ id: string; n: number }>(
+    `SELECT import_job_id AS id, COUNT(*)::int AS n FROM daily_metrics WHERE workspace_id = :workspaceId AND import_job_id IN (:ids) GROUP BY import_job_id`,
+    { replacements: { workspaceId, ids: jobs.map((j) => j.id) }, type: QueryTypes.SELECT });
+  const ownedBy = new Map(owned.map((o) => [o.id, o.n]));
+  return jobs.map((j) => ({ ...serializeJob(j), rowsOwned: ownedBy.get(j.id) ?? 0 }));
+}
+
+/**
+ * Deletes the data an import currently owns, then removes ads, ad sets and campaigns that no longer have any data.
+ * The job stays in the history as "undone". Rows that a LATER import overwrote belong to that import and are kept.
+ */
+export async function undoImport(workspaceId: string, id: string) {
+  const job = await ImportJob.findOne({ where: { id, workspaceId } }); // another workspace's job "does not exist"
+  if (!job) throw notFound("Import not found");
+  if (job.status === "undone") throw new AppError(409, "ALREADY_UNDONE", "This import was already deleted");
+  if (job.status === "processing") throw new AppError(409, "STILL_PROCESSING", "This import is still running");
+
+  const deletedRows = await sequelize.transaction(async (t) => {
+    const deleted = await DailyMetric.destroy({ where: { workspaceId, importJobId: id }, transaction: t });
+    const orphan = (sql: string) => sequelize.query(sql, { replacements: { workspaceId }, transaction: t });
+    await orphan(`DELETE FROM ads a WHERE a.workspace_id = :workspaceId AND NOT EXISTS (SELECT 1 FROM daily_metrics m WHERE m.ad_id = a.id)`);
+    await orphan(`DELETE FROM ad_sets s WHERE s.workspace_id = :workspaceId AND NOT EXISTS (SELECT 1 FROM ads a WHERE a.ad_set_id = s.id)`);
+    await orphan(`DELETE FROM campaigns c WHERE c.workspace_id = :workspaceId AND NOT EXISTS (SELECT 1 FROM ad_sets s WHERE s.campaign_id = c.id)`);
+    await job.update({ status: "undone" }, { transaction: t });
+    return deleted;
+  });
+  return { id: job.id, status: job.status, deletedRows };
 }
 
 function serializeJob(job: ImportJob) {

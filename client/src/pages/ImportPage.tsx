@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Select } from "@/components/ui/input";
 import { ErrorBox } from "@/components/ui/states";
+import { ImportHistory } from "@/components/ImportHistory";
 import { api, ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import type { ImportJob } from "@/lib/types";
@@ -34,7 +35,7 @@ export function ImportPage() {
       return api<ImportJob>("/api/imports/csv", { form });
     },
     // New data changes every report: invalidate the analytics cache.
-    onSuccess: () => { for (const k of ["summary", "timeseries", "campaigns", "campaign"]) qc.invalidateQueries({ queryKey: [k] }); },
+    onSuccess: () => { for (const k of ["summary", "timeseries", "campaigns", "campaign", "imports"]) qc.invalidateQueries({ queryKey: [k] }); },
   });
 
   const choose = (f: File | null) => { setFile(f); setMapping({}); upload.reset(); };
@@ -131,6 +132,7 @@ export function ImportPage() {
       </Card>
 
       {job && <ImportReport job={job} />}
+      <ImportHistory />
     </>
   );
 }

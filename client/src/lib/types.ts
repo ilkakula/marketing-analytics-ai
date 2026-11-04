@@ -20,7 +20,7 @@ export interface CampaignDetail {
 }
 export interface Workspace { id: string; name: string; currency: string; timezone: string }
 export interface ImportJob {
-  id: string; filename: string; status: "completed" | "completed_with_errors" | "failed";
+  id: string; filename: string; status: "completed" | "completed_with_errors" | "failed" | "undone";
   totalRows: number; rowsImported: number; rowsFailed: number;
   errors: { row: number; column?: string; message: string }[]; errorsTruncated: boolean;
 }
@@ -45,3 +45,5 @@ export interface AskResult {
   generatedAt: string; notice?: AskNotice;
   steps: Array<{ tool: string; args: unknown; ok: boolean }>;
 }
+
+export interface ImportHistoryItem extends ImportJob { rowsOwned: number; createdAt: string }
