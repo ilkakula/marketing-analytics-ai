@@ -42,6 +42,7 @@ export function ImportPage() {
   const err = upload.error instanceof ApiError ? upload.error : null;
   const missing: string[] | undefined = err?.details?.missing;
   const found: string[] = err?.details?.foundColumns ?? [];
+  const autoDetected: Record<string, string> = err?.details?.detected ?? {};
   const job = upload.data;
   const step = job ? 3 : missing ? 2 : 1;
 
@@ -108,7 +109,13 @@ export function ImportPage() {
           {missing && (
             <div className="space-y-4 rounded-2xl border border-warn/30 bg-warn-soft p-4">
               <p className="flex items-start gap-2 text-sm"><TriangleAlert className="mt-0.5 size-4 shrink-0 text-warn" aria-hidden />
-                <span>{err!.message}. Map the columns from your file to the required fields.</span></p>
+                <span>{err!.message}. Map the columns from your file to the required fields; the mapping is remembered for files with the same columns.</span></p>
+              {Object.keys(autoDetected).length > 0 && (
+                <p className="text-xs text-ink-2">
+                  Matched automatically: {Object.entries(autoDetected).map(([f, c]) => `${FIELD_LABEL[f] ?? f} ← ${c}`).join(", ")}.
+                  Only the fields below still need a column.
+                </p>
+              )}
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {[...missing, ...OPTIONAL_FIELDS].map((m) => (
                   <Field key={m} label={FIELD_LABEL[m] ?? m}>
@@ -118,7 +125,7 @@ export function ImportPage() {
                         const { [m]: _drop, ...rest } = mapping;
                         setMapping(e.target.value ? { ...rest, [m]: e.target.value } : rest);
                       }}>
-                      <option value="">{OPTIONAL_FIELDS.includes(m) ? "— none —" : "— choose a column —"}</option>
+                      <option value="">{OPTIONAL_FIELDS.includes(m) ? (autoDetected[m] ? `— auto: ${autoDetected[m]} —` : "— none —") : "— choose a column —"}</option>
                       {found.map((c) => <option key={c} value={c}>{c}</option>)}
                     </Select>
                   </Field>
@@ -137,6 +144,26 @@ export function ImportPage() {
   );
 }
 
+const DETECTED_TEXT = {
+  meta: "Detected a Meta Ads export. Columns were matched automatically.",
+  google: "Detected a Google Ads export. Columns were matched automatically.",
+  saved: "Used the column mapping you saved for files with these columns.",
+  custom: "Mapping saved. Files with the same columns will import without this step.",
+} as const;
+
+function DetectedBanner({ detected }: { detected: NonNullable<ImportJob["detected"]> }) {
+  if (detected.kind === "standard") return null;
+  return (
+    <details className="rounded-xl border border-line bg-surface-2 px-4 py-3 text-sm">
+      <summary className="cursor-pointer font-medium">{DETECTED_TEXT[detected.kind]}</summary>
+      <p className="mt-2 text-xs text-ink-2">
+        {Object.entries(detected.mapping).map(([f, c]) => `${FIELD_LABEL[f] ?? f} ← ${c}`).join(" · ")}
+        {detected.headerRow > 1 && ` · header found on line ${detected.headerRow}`}
+      </p>
+    </details>
+  );
+}
+
 function ImportReport({ job }: { job: ImportJob }) {
   const ok = job.status === "completed";
   const failed = job.status === "failed";
@@ -150,6 +177,7 @@ function ImportReport({ job }: { job: ImportJob }) {
         {!failed && <Link to="/" className="text-sm font-medium text-accent-text hover:underline">Open overview →</Link>}
       </CardHeader>
       <CardBody className="space-y-5">
+        {job.detected && <DetectedBanner detected={job.detected} />}
         <dl className="grid grid-cols-3 gap-3">
           {([["Total rows", job.totalRows, ""], ["Imported", job.rowsImported, "text-good"], ["Rejected", job.rowsFailed, job.rowsFailed ? "text-bad" : ""]] as const).map(([k, v, c]) => (
             <div key={k} className="rounded-xl border border-line bg-surface-2 p-4">

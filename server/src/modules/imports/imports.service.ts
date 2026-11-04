@@ -1,7 +1,7 @@
 import type { Model, ModelStatic, Transaction } from "sequelize";
 import { sequelize } from "../../database/sequelize";
 import {
-  Ad, AdSet, Campaign, DailyMetric, DataSource, ImportJob, type ImportRowError, type ImportStatus,
+  Ad, AdSet, Campaign, DailyMetric, DataSource, ImportJob, ImportMapping, type ImportRowError, type ImportStatus,
 } from "../../database/models";
 import { AppError, notFound } from "../../shared/errors";
 import { QueryTypes } from "sequelize";
@@ -75,7 +75,8 @@ export async function importCsv(args: {
   workspaceId: string; userId: string; filename: string; buffer: Buffer; mapping: ColumnMapping;
 }) {
   // File structure errors (missing columns, empty file) throw a 400 before a job is created.
-  const parsed = parseCsv(args.buffer, args.mapping);
+  const savedRows = await ImportMapping.findAll({ where: { workspaceId: args.workspaceId } });
+  const parsed = parseCsv(args.buffer, args.mapping, new Map(savedRows.map((m) => [m.signature, m.mapping as ColumnMapping])));
 
   const job = await ImportJob.create({
     workspaceId: args.workspaceId, userId: args.userId, filename: args.filename, status: "processing",
@@ -91,12 +92,19 @@ export async function importCsv(args: {
     const status: ImportStatus = parsed.metrics.length === 0 ? "failed"
       : parsed.errors.length ? "completed_with_errors" : "completed";
     await job.update({ status, rowsImported: parsed.metrics.length });
+    // A mapping the user made by hand is remembered for files with the same columns (only after a useful import).
+    if (parsed.detected.kind === "custom" && status !== "failed") {
+      const where = { workspaceId: args.workspaceId, signature: parsed.signature };
+      const existing = await ImportMapping.findOne({ where });
+      if (existing) await existing.update({ mapping: parsed.effectiveMapping as Record<string, string> });
+      else await ImportMapping.create({ ...where, mapping: parsed.effectiveMapping as Record<string, string> });
+    }
   } catch (err) {
     const e: ImportRowError = { row: 0, message: "Internal error while writing data" };
     await job.update({ status: "failed", rowsImported: 0, errors: [e, ...job.errors].slice(0, MAX_STORED_ERRORS) });
     throw err;
   }
-  return serializeJob(job);
+  return { ...serializeJob(job), detected: parsed.detected };
 }
 
 export async function getImport(workspaceId: string, id: string) {

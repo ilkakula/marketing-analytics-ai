@@ -30,7 +30,7 @@ export const openapi = {
       requestBody: { required: true, content: { "multipart/form-data": { schema: { type: "object", required: ["file"], properties: {
         file: { type: "string", format: "binary" },
         mapping: { type: "string", description: 'JSON, npr. {"campaign":"Campaign Name","spend":"Cost"}' } } } } } },
-      responses: { "201": { description: "Import finished (status completed or completed_with_errors)" }, "400": errorResponse, "413": errorResponse, "422": { description: "No row is valid" } } } },
+      responses: { "201": { description: "Import finished (status completed or completed_with_errors); `detected` tells how columns were matched: standard, meta, google, saved or custom" }, "400": errorResponse, "413": errorResponse, "422": { description: "No row is valid" } } } },
     "/api/imports": { get: { summary: "Import history (newest first) with the rows each import currently owns", security: [{ bearer: [] }],
       responses: { "200": { description: "items[]" }, "401": errorResponse } } },
     "/api/imports/{id}": { delete: { summary: "Delete the data an import currently owns; empty campaigns are removed and the job stays in the history as undone", security: [{ bearer: [] }],

@@ -204,3 +204,19 @@ AdSet.hasMany(Ad, { foreignKey: "adSetId" });
 Ad.belongsTo(AdSet, { foreignKey: "adSetId" });
 Ad.hasMany(DailyMetric, { foreignKey: "adId" });
 DailyMetric.belongsTo(Ad, { foreignKey: "adId" });
+
+export class ImportMapping extends Model<InferAttributes<ImportMapping>, InferCreationAttributes<ImportMapping>> {
+  declare id: CreationOptional<string>;
+  declare workspaceId: string;
+  declare signature: string;
+  declare mapping: Record<string, string>;
+}
+ImportMapping.init(
+  {
+    id: uuidPk,
+    workspaceId: { type: DataTypes.UUID, allowNull: false },
+    signature: { type: DataTypes.STRING(40), allowNull: false },
+    mapping: { type: DataTypes.JSONB, allowNull: false },
+  },
+  { sequelize, tableName: "import_mappings" },
+);

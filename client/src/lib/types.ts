@@ -23,6 +23,8 @@ export interface ImportJob {
   id: string; filename: string; status: "completed" | "completed_with_errors" | "failed" | "undone";
   totalRows: number; rowsImported: number; rowsFailed: number;
   errors: { row: number; column?: string; message: string }[]; errorsTruncated: boolean;
+  /** How the columns were matched (only on the response of the import itself). */
+  detected?: { kind: "standard" | "meta" | "google" | "saved" | "custom"; mapping: Record<string, string>; headerRow: number };
 }
 export interface AuthResult {
   token: string; user: { id: string; email: string; name: string }; workspace: { id: string; name: string };
