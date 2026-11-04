@@ -8,6 +8,7 @@ import { ComparePage } from "@/pages/ComparePage";
 import { Campaigns } from "@/pages/Campaigns";
 import { Dashboard } from "@/pages/Dashboard";
 import { ImportPage } from "@/pages/ImportPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 
 function Protected() {
   const { authed } = useAuth();
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="campaigns/compare" element={<ComparePage />} />
         <Route path="campaigns/:id" element={<CampaignDetail />} />
         <Route path="import" element={<ImportPage />} />
+        <Route path="settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, LogOut, Megaphone, Menu, Moon, Sun, UploadCloud, X } from "lucide-react";
+import { LayoutDashboard, LogOut, Megaphone, Menu, Moon, Settings, Sun, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
@@ -10,6 +10,7 @@ const NAV = [
   { to: "/", label: "Overview", icon: LayoutDashboard, end: true },
   { to: "/campaigns", label: "Campaigns", icon: Megaphone, end: false },
   { to: "/import", label: "Import", icon: UploadCloud, end: false },
+  { to: "/settings", label: "Settings", icon: Settings, end: false },
 ];
 
 export function Logo({ className }: { className?: string }) {
