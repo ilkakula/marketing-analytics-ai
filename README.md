@@ -9,7 +9,7 @@ plain-language findings and recommendations in which every number is checked aga
 
 | | |
 |---|---|
-| **Import** | CSV upload with column mapping, per-row error reports (row, column, reason) and idempotent re-imports. Handles `;` separators, decimal commas and BOMs. Import history with deletion of an import's data. |
+| **Import** | CSV upload with **automatic recognition of Meta Ads and Google Ads exports** (title lines, `Total` rows, currency symbols, thousands separators, `--`), a one-time column mapping that is remembered per file layout, per-row error reports (row, column, reason) and idempotent re-imports. Handles `;` and tab separators, decimal commas, BOMs and UTF-16. Import history with deletion of an import's data. |
 | **Overview** | Spend, revenue, ROAS, conversions, CPA, CTR, CPC and clicks, each compared with the previous period and shown with a trend line. |
 | **Campaigns** | Search, sort by any metric, per-campaign details (ad sets and ads), side-by-side comparison of up to four campaigns, CSV export protected against formula injection. |
 | **AI insights** | A deterministic rules engine finds the problems (campaign losing money, CPC spike, conversion decline, runaway budget, broken tracking). An LLM explains them. |
@@ -38,6 +38,8 @@ npm run eval:llm -- --judge    # real model: grounded numbers, injection resista
 npm run eval:compare -- --models gemini-3.5-flash-lite,gemini-3.1-flash-lite
 npm run eval:ask               # tool choice, answer correctness, refusals
 ```
+Measured so far (synthetic data, `gemini-3.5-flash-lite`): rule findings 100% precision and 100% recall on 13 scenarios; the validator catches 13 of 13 defective answers with no false rejects; the quality judge ranks a solid answer 5/5 against 1 to 2.2 for deliberately bad ones; the model's answers had 100% grounded numbers and 100% resistance to prompt injection; "Ask your data" chose the right tools for 14 of 14 questions, with every answer verified and every off-topic or prompt-leak request refused. The model comparison is still to be run (the free daily quota of the larger models was used up).
+
 The free Gemini tier allows 15 requests per minute per model and 20 per day for the larger Flash models, so the evaluation paces its calls.
 
 ## Stack

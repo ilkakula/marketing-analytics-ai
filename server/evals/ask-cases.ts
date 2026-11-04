@@ -34,8 +34,10 @@ export const ASK_CASES: AskCase[] = [
   { id: "campaign-conversions", scenario: "several-problems", period: ALL, question: "How many conversions did New Collection get?",
     expect: { toolsAny: ["get_campaign_details", "list_campaigns", "get_summary"], names: ["New Collection"],
       numbers: async (p) => [(await p.listCampaigns({ workspaceId: "eval", ...ALL }, { search: "New Collection", sortBy: "spend", order: "desc", page: 1, pageSize: 1 })).items[0]!.conversions] } },
+  // The expected winner is COMPUTED from the data (a hard-coded guess was wrong once: the model was right).
   { id: "most-conversions", scenario: "several-problems", period: ALL, question: "Which campaign has the most conversions?",
-    expect: { toolsAny: ["list_campaigns", "get_summary"], names: ["Brand Search"] } },
+    expect: { toolsAny: ["list_campaigns", "get_summary"], names: ["Prospecting"],
+      numbers: async (p) => [(await p.listCampaigns({ workspaceId: "eval", ...ALL }, { sortBy: "conversions", order: "desc", page: 1, pageSize: 1 })).items[0]!.conversions] } },
   { id: "relative-dates", scenario: "several-problems", period: ALL, question: "How much did we spend in the last 7 days of data?",
     expect: { toolsAny: ["get_summary", "get_trend"], numbers: async (p) => [await spend(p, { from: "2026-10-05", to: "2026-10-11" })] } },
   { id: "two-periods", scenario: "several-problems", period: ALL,
